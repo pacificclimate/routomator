@@ -104,49 +104,54 @@ subbasins <- c('REVL','SIML','CANO','OKAN','KOTR','LARL','BULL','KETL','SMAR','K
 # Load in existing location
 #loc <- initGRASS("/usr/lib/grass64", home='/home/bveerman/', gisDbase='/home/bveerman/grassdata', location='vic_routing', mapset='PERMANENT', override=TRUE)
 loc <- initGRASS(gisBase="/home/bveerman/download/grass_trunk/dist.x86_64-unknown-linux-gnu", home='/home/bveerman/', gisDbase='/home/bveerman/grassdata', location='vic_routing', mapset='PERMANENT', override=TRUE)
+execGRASS('d.mon', parameters=list(start='wx1'))
 
+# list all mapsets
+execGRASS("g.mapsets", flags=c("l"))
+# list mapsets in current search path
+execGRASS("g.mapsets", flags=c("p"))
 
-# add watershed specific mapset if doesn't already exist
-execGRASS("g.mapsets", flags=c("l","p"))
-
-execGRASS("g.mapsets", parameters=list(removemapset=watershed))
-
-execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location='vic_routing'))
-execGRASS("g.mapsets", parameters=list(addmapset=watershed))
-execGRASS("g.mapsets", parameters=list(addmapset='PERMANENT'))
-execGRASS("g.mapset", parameters=list(mapset=watershed))
-execGRASS("g.region", parameters=list(rast="dem-15"))
+# if creating mapset for the first time:
+create <- FALSE
+if (create == TRUE) {
+  execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location='vic_routing'))
+  execGRASS("g.mapsets", parameters=list(mapset=watershed, operation='add'))
+  execGRASS("g.mapsets", parameters=list(mapset='PERMANENT', operation='add'))
+  execGRASS("g.mapset", parameters=list(mapset=watershed))
+  # create watershed boundary based on subbasin selections
+  d <- dirname(cwb)
+  f <- sub("\\.[^.]*$", "", basename(cwb))
+  query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
+  execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
+} else {
+  execGRASS("g.mapsets", parameters=list(mapset=watershed, operation='add'))
+  execGRASS("g.mapset", parameters=list(mapset=watershed))
+}
 
 # make sure we have all the necessary layers
 execGRASS("g.list", flags="f", parameters=list(type='rast'))
 execGRASS("g.list", flags="f", parameters=list(type='vect'))
 
-# create watershed boundary based on subbasin selections
-d <- dirname(cwb)
-f <- sub("\\.[^.]*$", "", basename(cwb))
-query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
-execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
 
-# should we mask to watershed region?
-# http://lists.osgeo.org/pipermail/grass-user/2010-September/057962.html
+### DEM PREP ###
+# mask all raster operations to watershed region
+execGRASS("r.mask", parameters=list(vector="ws"))
 
-# create a filled direction raster
+# METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
 execGRASS("g.region", parameters=list(rast="dem-15"))
-execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-15', elevation="dem-filled-15", direction="dem-direction-15"))
-execGRASS('d.rast', parameters=list(map="dem-direction-15"))
+execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-15', output="dem-filled-15", outdir="dem-filled-dir-15"))
+#execGRASS("r.carve", flags="n", parameters=list(rast="dem-filled-15", vect="stream", output="dem-carved-15")) #takes FOREVER!!!
+execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-carved-15', output="dem-filled-carved-15", outdir="dem-filled-carved-dir-15"))
+execGRASS("r.terraflow", flags="overwrite", parameters=list(elevation="dem-filled-carved-15", drainage='flow-dir-15', accumulation="flow-accumulation-tf-15"))
+          
+# METHOD 2: using r.hydrodem with minimal corrections, pipe to r.watershed
+execGRASS("g.region", parameters=list(rast="dem-15"))
+execGRASS("r.hydrodem", parameters=list(input='dem-15', output="dem-hydrodem-15"))
+execGRASS("r.watershed", flags=c("overwrite", "s", "b"), parameters=list(elevation="dem-hydrodem-15", accumulation="flow-accumulation-ws-15", drainage="flow-dir-ws-15"))
 
+# EXPORT CONDIDTIONED DEM FOR make_rout.scr
+execGRASS("r.out.ascii", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15', output="flow-acc-15"))
 
-# from filled direction raster, burn in streams and re-fill
-execGRASS("r.carve", flags="n", parameters=list(rast="dem-filled-15", vect="stream", output="dem-carved-15"))
-# currently takes forever.... lets check output map w/out burning first
-#~ execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-carved-15', elevation="dem-final-15"))
-
-# final 15as DEM is now used to creat flow direction and accumulation
-execGRASS("g.remove", parameters=list(rast="flow-accumulation-15"))
-execGRASS("g.remove", parameters=list(rast="flow-dir-15"))
-execGRASS("r.watershed", flags="overwrite", parameters=list(elevation="dem-filled-15", drainage='flow-dir-15', accumulation="flow-accumulation-15"))
-
-execGRASS('d.mon', parameters=list(start='x0'))
 
 readRAST6(vname, cat=NULL, ignore.stderr = NULL, NODATA=NULL, plugin=NULL, mapset=NULL, useGDAL=NUL
 
