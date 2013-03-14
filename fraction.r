@@ -135,6 +135,11 @@ execGRASS("g.list", flags="f", parameters=list(type='vect'))
 
 ### DEM PREP ###
 # mask all raster operations to watershed region
+execGRASS("v.db.addcol", parameters=list(map="ws", columns="merge"))
+execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="wstemp", option='del'))
+execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="ws", option='add', cat=as.integer(1), step=as.integer(0)))
+execGRASS("v.dissolve", parameters=list(input="wscat", output="wsdissolve"))
+execGRASS("v.to.rast", parameters=list(input="ws", output="ws-boundary", type='line', use='val', value=1))
 execGRASS("r.mask", parameters=list(vector="ws"))
 
 # METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
@@ -148,9 +153,13 @@ execGRASS("r.terraflow", flags="overwrite", parameters=list(elevation="dem-fille
 execGRASS("g.region", parameters=list(rast="dem-15"))
 execGRASS("r.hydrodem", parameters=list(input='dem-15', output="dem-hydrodem-15"))
 execGRASS("r.watershed", flags=c("overwrite", "s", "b"), parameters=list(elevation="dem-hydrodem-15", accumulation="flow-accumulation-ws-15", drainage="flow-dir-ws-15"))
+# r.watershed uses negative values for flow accumunation values on perimeter, must correct
+execGRASS("r.mapcalc", parameters=list(expression="'flow-accumulation-ws-15-abs'=abs('flow-accumulation-ws-15')"))
+
+execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-15-abs'))
 
 # EXPORT CONDIDTIONED DEM FOR make_rout.scr
-execGRASS("r.out.ascii", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15', output="flow-acc-15"))
+execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15-abs', output="flow-acc-15"))
 
 
 readRAST6(vname, cat=NULL, ignore.stderr = NULL, NODATA=NULL, plugin=NULL, mapset=NULL, useGDAL=NUL
