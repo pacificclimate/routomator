@@ -135,11 +135,12 @@ execGRASS("g.list", flags="f", parameters=list(type='vect'))
 
 ### DEM PREP ###
 # mask all raster operations to watershed region
-execGRASS("v.db.addcol", parameters=list(map="ws", columns="merge"))
-execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="wstemp", option='del'))
-execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="ws", option='add', cat=as.integer(1), step=as.integer(0)))
-execGRASS("v.dissolve", parameters=list(input="wscat", output="wsdissolve"))
-execGRASS("v.to.rast", parameters=list(input="ws", output="ws-boundary", type='line', use='val', value=1))
+execGRASS("v.db.addcolumn", parameters=list(map="ws", columns="merge int"))
+execGRASS("v.db.update", parameters=list(map="ws", column="merge", value="1"))
+#execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="wstemp", option='del'))
+#execGRASS("v.category", flags=c('overwrite'), parameters=list(input="ws", output="ws", option='add', cat=as.integer(1), step=as.integer(0)))
+execGRASS("v.dissolve", flags=c('overwrite'), parameters=list(input="ws", output="wsdissolve", column="merge", layer='1'))
+execGRASS("v.to.rast", parameters=list(input="wsdissolve", output="wsboundary", use='val', value=1))
 execGRASS("r.mask", parameters=list(vector="ws"))
 
 # METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
