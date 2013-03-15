@@ -100,6 +100,9 @@ execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-1
 execGRASS("r.mask", flags=c("r")) #get rid of mask, it makes output funny...
 execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15-abs', output="flow-acc-15.asc"))
 
-### From Flow Accumulation
+### From Flow Accumulation, invoke make_rout.sh to create 1/16th Flow Direction ###
+A <- system2("./make_rout.sh")
+if (A != 0) { stop("Routing script had errors") }
+
 
 unlink_.gislock()
