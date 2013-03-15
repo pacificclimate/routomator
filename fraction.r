@@ -116,7 +116,6 @@ create <- FALSE
 if (create == TRUE) {
   execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location='vic_routing'))
   execGRASS("g.mapsets", parameters=list(mapset=watershed, operation='add'))
-  execGRASS("g.mapsets", parameters=list(mapset='PERMANENT', operation='add'))
   execGRASS("g.mapset", parameters=list(mapset=watershed))
   # create watershed boundary based on subbasin selections
   d <- dirname(cwb)
@@ -133,7 +132,7 @@ execGRASS("g.list", flags="f", parameters=list(type='rast'))
 execGRASS("g.list", flags="f", parameters=list(type='vect'))
 
 
-### DEM PREP ###
+### Create Condidtioned DEM and Flow Accumulation ###
 
 # Mask All Raster Operations To Watershed Region
   # unfortunately simply adding a mask sourced from a vector does not have any options on what
@@ -164,17 +163,17 @@ execGRASS("v.to.rast",
 execGRASS("r.mapcalc",
           flags=c('overwrite'),
           parameters=list(expression="ws_mask='wsarearaster'||'wsboundaryraster'"))
-
 execGRASS("r.mask", parameters=list(raster="ws_mask"))
 
-# METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
+# Condidtion DEM and Create Flow Accumulation
+  # METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
 execGRASS("g.region", parameters=list(rast="dem-15"))
 execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-15', output="dem-filled-15", outdir="dem-filled-dir-15"))
 #execGRASS("r.carve", flags="n", parameters=list(rast="dem-filled-15", vect="stream", output="dem-carved-15")) #takes FOREVER!!!
 execGRASS("r.fill.dir", flags="overwrite", parameters=list(input='dem-carved-15', output="dem-filled-carved-15", outdir="dem-filled-carved-dir-15"))
 execGRASS("r.terraflow", flags="overwrite", parameters=list(elevation="dem-filled-carved-15", drainage='flow-dir-15', accumulation="flow-accumulation-tf-15"))
-          
-# METHOD 2: using r.hydrodem with minimal corrections, pipe to r.watershed
+
+  # METHOD 2: using r.hydrodem with minimal corrections, pipe to r.watershed
 execGRASS("g.region", parameters=list(rast="dem-15"))
 execGRASS("r.hydrodem", parameters=list(input='dem-15', output="dem-hydrodem-15"))
 execGRASS("r.watershed", flags=c("overwrite", "s", "b"), parameters=list(elevation="dem-hydrodem-15", accumulation="flow-accumulation-ws-15", drainage="flow-dir-ws-15"))
@@ -184,7 +183,9 @@ execGRASS("r.mapcalc", parameters=list(expression="'flow-accumulation-ws-15-abs'
 execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-15-abs'))
 
 # EXPORT CONDIDTIONED DEM FOR make_rout.scr
-execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15-abs', output="flow-acc-15"))
+execGRASS("r.mask", flags=c("r")) #get rid of mask, it makes output funny...
+execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-accumulation-ws-15-abs', output="flow-acc-15.asc"))
+
 
 
 readRAST6(vname, cat=NULL, ignore.stderr = NULL, NODATA=NULL, plugin=NULL, mapset=NULL, useGDAL=NUL
