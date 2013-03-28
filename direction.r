@@ -9,25 +9,19 @@
 #~ grid cell resolution.
 
 library(spgrass6)
-
-watershed <- 'columbia'
-subbasins <- c('REVL','SIML','CANO','OKAN','KOTR','LARL','BULL','KETL','SMAR','KOTL','KHOR','DUNC','UARL','SLOC','CLRH','ELKR','COLR')
-
-#~ watershed <- 'peace'
-#~ subbasins <- c('AKIEC','BCPCN','GRAHM','HALGR','KWADA','MOBER','MURWV','NATMO','OSILI','PACKM','PEACT','PINPN','BCGMS','FINAK','HALFA','INGEN','MESIL','MURMO','NATFT','OMNOS','OSPIK','PARMS','PEAPN','SUKMO')
+source('config.r')
 
 # Load in existing location
-#loc <- initGRASS("/usr/lib/grass64", home='/home/bveerman/', gisDbase='/home/bveerman/grassdata', location='vic_routing', mapset='PERMANENT', override=TRUE)
-loc <- initGRASS(gisBase="/home/bveerman/download/grass_trunk/dist.x86_64-unknown-linux-gnu", home='/home/bveerman/', gisDbase='/home/bveerman/grassdata', location='vic_routing', mapset='PERMANENT', override=TRUE)
+loc <- initGRASS(gisBase=gisBase, home='/home/bveerman/', gisDbase=gisDbase, location=location, mapset='PERMANENT', override=TRUE)
 
-# list all mapsets
-execGRASS("g.mapsets", flags=c("l"))
-# list mapsets in current search path
-execGRASS("g.mapsets", flags=c("p"))
-
+if (verbose){
+  # list all mapsets
+  execGRASS("g.mapsets", flags=c("l"))
+  # list mapsets in current search path
+  execGRASS("g.mapsets", flags=c("p"))
+}
 # if creating mapset for the first time:
-create <- FALSE
-if (create == TRUE) {
+if (watershed.isnew) {
   execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location='vic_routing'))
   execGRASS("g.mapsets", parameters=list(mapset=watershed, operation='add'))
   execGRASS("g.mapset", parameters=list(mapset=watershed))
@@ -41,10 +35,11 @@ if (create == TRUE) {
   execGRASS("g.mapset", parameters=list(mapset=watershed))
 }
 
-# make sure we have all the necessary layers
-execGRASS("g.list", flags="f", parameters=list(type='rast'))
-execGRASS("g.list", flags="f", parameters=list(type='vect'))
-
+if (verbose){
+  # make sure we have all the necessary layers
+  execGRASS("g.list", flags="f", parameters=list(type='rast'))
+  execGRASS("g.list", flags="f", parameters=list(type='vect'))
+}
 
 ### Create Condidtioned DEM and Flow Accumulation ###
 
@@ -115,6 +110,8 @@ execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-dir-ws-
 ### From Flow Accumulation, invoke make_rout.sh to create 1/16th Flow Direction ###
 A <- system2("./make_rout.sh")
 if (A != 0) { stop("Routing script had errors") }
+
+execGRASS("r.in.arc", flags=c("overwrite"), parameters=list(input='flow-dir-16th.asc', output='flow-dir-16th-vic'))
 
 
 unlink_.gislock()
