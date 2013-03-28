@@ -75,32 +75,36 @@ execGRASS("r.mapcalc",
 execGRASS("r.mask", parameters=list(raster="ws_mask"))
 
 # Condidtion DEM and Create Flow Accumulation
+
+if (method == 1){
   # METHOD 1: create a filled dem, burn streams, pipe to r.terraflow (r.flow possible as well)
-execGRASS("g.region",
+  execGRASS("g.region",
           parameters=list(rast="dem-15"))
-execGRASS("r.fill.dir",
+  execGRASS("r.fill.dir",
           flags="overwrite",
           parameters=list(input='dem-15', output="dem-filled-15", outdir="dem-filled-dir-15"))
-#execGRASS("r.carve", flags="n", parameters=list(rast="dem-filled-15", vect="stream", output="dem-carved-15")) #takes FOREVER!!!
-execGRASS("r.fill.dir",
+  #execGRASS("r.carve", flags="n", parameters=list(rast="dem-filled-15", vect="stream", output="dem-carved-15")) #takes FOREVER!!!
+  execGRASS("r.fill.dir",
           flags="overwrite",
-          parameters=list(input='dem-carved-15', output="dem-filled-carved-15", outdir="dem-filled-carved-dir-15"))
-execGRASS("r.terraflow",
+          parameters=list(input='dem-filled-15', output="dem-filled-carved-15", outdir="dem-filled-carved-dir-15"))
+  execGRASS("r.terraflow",
           flags="overwrite",
           parameters=list(elevation="dem-filled-carved-15", drainage='flow-dir-15', accumulation="flow-accumulation-tf-15"))
-
+}
+if (method == 2) {
   # METHOD 2: using r.hydrodem with minimal corrections, pipe to r.watershed
-execGRASS("g.region",
+  execGRASS("g.region",
           parameters=list(rast="dem-15"))
-execGRASS("r.hydrodem",
+  execGRASS("r.hydrodem",
           parameters=list(input='dem-15', output="dem-hydrodem-15"))
-execGRASS("r.watershed",
+  execGRASS("r.watershed",
           flags=c("overwrite", "s", "b"),
           parameters=list(elevation="dem-hydrodem-15", accumulation="flow-accumulation-ws-15", drainage="flow-dir-ws-15"))
-# r.watershed uses negative values for outflow values on perimeter, must correct
-execGRASS("r.mapcalc", parameters=list(expression="'flow-accumulation-ws-15-abs'=abs('flow-accumulation-ws-15')"))
+  # r.watershed uses negative values for outflow values on perimeter, must correct
+  execGRASS("r.mapcalc", parameters=list(expression="'flow-accumulation-ws-15-abs'=abs('flow-accumulation-ws-15')"))
 
-execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-15-abs'))
+  execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-15-abs'))
+}
 
 # Export Condidtioned Dem For make_rout.sh
 execGRASS("r.mask", flags=c("r")) #get rid of mask, it makes output funny...

@@ -3,7 +3,7 @@
 
 outdir <- '.'
 verbose <- TRUE
-
+method = 2 #choose method 1 or 2 for creating flow accumulation raster for flowgen.c
 # What watershed are we calculating for?
 watershed <- 'columbia'
 subbasins <- c('REVL','SIML','CANO','OKAN','KOTR','LARL','BULL','KETL','SMAR','KOTL','KHOR','DUNC','UARL','SLOC','CLRH','ELKR','COLR')
