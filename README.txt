@@ -1,6 +1,7 @@
 VIC Routomator 
 
 Version:0.1b
+Author: Basil Veerman
 
 Overview:
 The Vic Routomator is designed to automate the creation of input files require for the VIC routing model.
@@ -8,6 +9,7 @@ The Vic Routomator is designed to automate the creation of input files require f
 Requirements:
 GRASS7.0-svn
 R with modules:sp, maptools, raster, xml, rgdal, rgeos, spgrass6
+
 Raster files that are produced:
 Flow Direction in VIC format directions:
      8  1  2
@@ -33,4 +35,5 @@ Additional files created is a station location file that identifies the grid cel
 
 All configuration options are detailed in config.r.
 
-Scripts can be run individually in order: grass_prep.r, direction.r, fraction.r, velocity_diffusion.r, xmask.py
+1). Must first run 'make all' to compile the flowgen and conver binaries.
+2). Scripts can be run individually in order: grass_prep.r, direction.r, fraction.r, velocity_diffusion.r, xmask.py
