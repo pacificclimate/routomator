@@ -6,18 +6,22 @@
 
 
 outdir <- '/home/data/projects/hydrology/vic/data/routomator/output'
+tempfiles <- '/home/data/projects/hydrology/vic/data/routomator/tempfiles'
 verbose <- TRUE
 method = 2 #choose method 1 or 2 for creating flow accumulation raster for flowgen.c
+
 # What watershed are we calculating for?
 watershed <- 'columbia'
 subbasins <- c('REVL','SIML','CANO','OKAN','KOTR','LARL','BULL','KETL','SMAR','KOTL','KHOR','DUNC','UARL','SLOC','CLRH','ELKR','COLR')
-watershed.isnew <- FALSE
+watershed.isnew <- TRUE
 
 #~ watershed <- 'peace'
 #~ subbasins <- c('AKIEC','BCPCN','GRAHM','HALGR','KWADA','MOBER','MURWV','NATMO','OSILI','PACKM','PEACT','PINPN','BCGMS','FINAK','HALFA','INGEN','MESIL','MURMO','NATFT','OMNOS','OSPIK','PARMS','PEAPN','SUKMO')
 
-# GRASS7 settings - You should not need to change these
+# GRASS7 settings - You should not need to change these unless on a different machine or something
 
+veg <- "/home/data/gis/vic_bc/vegetation/majority1km2_wgs84_BC.shp"
+cwb <- "/home/data/gis/basedata/BC_Water/BC_CWB/CWB_WS_GRP/CWB_WS_GRP_wgs1984.shp"
 gisBase <- "/home/bveerman/downloads/grass7_trunk/dist.x86_64-unknown-linux-gnu"
 gisDbase <- '/home/data/projects/hydrology/vic/data/routomator/grassdata'
-location <- 'test7'
+location <- 'vic_routing_test'
