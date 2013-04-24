@@ -3,7 +3,7 @@ set -e
 
 #TWO FILES NEEDED: INPUT FLOW ACCUMULATION AND OUTPUT FLOW DIRECTION
 #30 arc-second flow accumulation grid
-ACC=flow-acc-15.asc
+ACC=$1
 OUT=flow-dir-16th.asc
 #output file is 1/16 degree -- change script for other resolutions
 #END OF INPUT
