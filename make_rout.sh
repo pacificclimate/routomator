@@ -4,7 +4,7 @@ set -e
 #TWO FILES NEEDED: INPUT FLOW ACCUMULATION AND OUTPUT FLOW DIRECTION
 #30 arc-second flow accumulation grid
 ACC=$1
-OUT=flow-dir-16th.asc
+OUT=$2
 #output file is 1/16 degree -- change script for other resolutions
 #END OF INPUT
 
@@ -19,10 +19,14 @@ tail -n +7 $ACC > temp_body.junk
 
 #convert to long ints
 #convert ascii longint temp_body.junk temp_li.junk $ROWS $COLS
+echo "Converting data types..."
 ./bin/convert ascii longint temp_body.junk temp_li.junk $ROWS $COLS
+echo "Done"
 
 #run program to generate 1/16 degree flow directions
+echo "Creating flow diretions"
 ./bin/flowgen temp_li.junk $ROWS $COLS temp_fd.junk 15 15
+echo "Done"
 
 #put new header back on top
 RR=`echo $ROWS '/' '15.0' | bc -l`
