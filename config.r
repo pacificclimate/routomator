@@ -13,15 +13,14 @@ method = 2 #choose method 1 or 2 for creating flow accumulation raster for flowg
 # What watershed are we calculating for?
 watershed <- 'columbia'
 subbasins <- c('REVL','SIML','CANO','OKAN','KOTR','LARL','BULL','KETL','SMAR','KOTL','KHOR','DUNC','UARL','SLOC','CLRH','ELKR','COLR')
-watershed.isnew <- TRUE
 
-#~ watershed <- 'peace'
-#~ subbasins <- c('AKIEC','BCPCN','GRAHM','HALGR','KWADA','MOBER','MURWV','NATMO','OSILI','PACKM','PEACT','PINPN','BCGMS','FINAK','HALFA','INGEN','MESIL','MURMO','NATFT','OMNOS','OSPIK','PARMS','PEAPN','SUKMO')
+## watershed <- 'peace'
+## subbasins <- c('AKIEC','BCPCN','GRAHM','HALGR','KWADA','MOBER','MURWV','NATMO','OSILI','PACKM','PEACT','PINPN','BCGMS','FINAK','HALFA','INGEN','MESIL','MURMO','NATFT','OMNOS','OSPIK','PARMS','PEAPN','SUKMO')
 
 # GRASS7 settings - You should not need to change these unless on a different machine or something
 
 veg <- "/home/data/gis/vic_bc/vegetation/majority1km2_wgs84_BC.shp"
 cwb <- "/home/data/gis/basedata/BC_Water/BC_CWB/CWB_WS_GRP/CWB_WS_GRP_wgs1984.shp"
-gisBase <- "/home/bveerman/downloads/grass7_trunk/dist.x86_64-unknown-linux-gnu"
+gisBase <- "/home/data/projects/comp_support/software/grass7_trunk/dist.x86_64-unknown-linux-gnu"
 gisDbase <- '/home/data/projects/hydrology/vic/data/routomator/grassdata'
-location <- 'vic_routing_test'
+location <- 'vic_routing_test2'
