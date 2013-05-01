@@ -12,8 +12,7 @@ library(spgrass6)
 source('config.r')
 
 # Load in existing location
-unlink_.gislock()
-loc <- initGRASS(gisBase=gisBase, home='/home/bveerman/', gisDbase=gisDbase, location=location, mapset='PERMANENT', override=TRUE)
+loc <- initGRASS(gisBase=gisBase, gisDbase=gisDbase, location=location, mapset='PERMANENT', override=TRUE)
 
 if (verbose){
   # list all available mapsets
@@ -21,19 +20,23 @@ if (verbose){
   # list mapsets in current search path
   execGRASS("g.mapsets", flags=c("p"))
 }
-# if creating mapset for the first time:
-if (watershed.isnew) {
-  execGRASS("g.extension", parameters=list(extension="r.hydrodem", operation='add'))
-  execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location=location))
-  execGRASS("g.mapset", parameters=list(mapset=watershed))
-  # create watershed boundary based on subbasin selections
+
+## if creating mapset for the first time
+x <- execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location=location))
+
+if (x == 0) {
+  ## watershed creation successful, must do prepwork
+  ## create watershed boundary based on subbasin selections
   d <- dirname(cwb)
   f <- sub("\\.[^.]*$", "", basename(cwb))
   query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
   execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
 } else {
-  execGRASS("g.mapsets", parameters=list(mapset=watershed, operation='add'))
-  execGRASS("g.mapset", parameters=list(mapset=watershed))
+    ## watershed was already created, just switch into it
+  x <- execGRASS("g.mapset", parameters=list(mapset=watershed))
+  if (x != 0) {
+    stop('Unable to create or switch into previously created mapset... something is up and needs to be looked into')
+  }
 }
 
 if (verbose){
@@ -47,45 +50,41 @@ if (verbose){
 # Mask All Raster Operations To Watershed Region
   # unfortunately simply adding a mask sourced from a vector does not have any options on what
   # to do about partial cells on boundary: must convert boundary to lines, lines to raster, and
-  # merge with mask from polygon to make sure boundaries are included
-execGRASS("g.remove", parameters=list(rast="MASK"))
-
-if (watershed.isnew){
-  execGRASS("v.db.addcolumn",
-            parameters=list(map="ws", columns="merge int"))
-  execGRASS("v.db.update",
-            parameters=list(map="ws", column="merge", value="1"))
-  execGRASS("v.dissolve",
-            flags=c('overwrite'),
-            parameters=list(input="ws", output="wsdissolve", column="merge", layer='1'))
-  execGRASS("v.type",
-            flags=c('overwrite'),
-            parameters=list(input="wsdissolve", output="wsboundary", from_type="boundary", to_type="line"))
-  execGRASS("v.category",
-            flags=c('overwrite'),
-            parameters=list(input="wsboundary", output="wsboundarynamed", type="line", option="add", cat=as.integer(1)))
-  execGRASS("v.clean",
-            flags=c('overwrite'),
-            parameters=list(input="wsboundarynamed", output="wsboundaryline", type="line", tool="rmdac"))
-  execGRASS("v.to.rast",
-            flags=c('overwrite'),
-            parameters=list(input="wsboundaryline", output="wsboundaryraster", use='val', value=1))
-  execGRASS("v.to.rast",
-            flags=c('overwrite'),
-            parameters=list(input="wsdissolve", output="wsarearaster", use='val', value=1))
-  execGRASS("r.mapcalc",
-            flags=c('overwrite'),
-            parameters=list(expression="ws_mask='wsarearaster'||'wsboundaryraster'"))
-}
+  # merge with mask from polygon to make sure boundaries are included.
+  # First remove all intermediate or output MASK layers
+execGRASS("g.remove", parameters=list(rast="wsboundaryraster,wsarearaster,ws_mask,MASK", vect="wsdissolve,wsboundary,wsboundarynamed,wsboundaryline"))
+execGRASS("v.db.addcolumn",
+          parameters=list(map="ws", columns="merge int"))
+execGRASS("v.db.update",
+          parameters=list(map="ws", column="merge", value="1"))
+execGRASS("v.dissolve",
+          flags=c('overwrite'),
+          parameters=list(input="ws", output="wsdissolve", column="merge", layer='1'))
+execGRASS("v.type",
+          flags=c('overwrite'),
+          parameters=list(input="wsdissolve", output="wsboundary", from_type="boundary", to_type="line"))
+execGRASS("v.category",
+          flags=c('overwrite'),
+          parameters=list(input="wsboundary", output="wsboundarynamed", type="line", option="add", cat=as.integer(1)))
+execGRASS("v.clean",
+          flags=c('overwrite'),
+          parameters=list(input="wsboundarynamed", output="wsboundaryline", type="line", tool="rmdac"))
+execGRASS("v.to.rast",
+          flags=c('overwrite'),
+          parameters=list(input="wsboundaryline", output="wsboundaryraster", use='val', value=1))
+execGRASS("v.to.rast",
+          flags=c('overwrite'),
+          parameters=list(input="wsdissolve", output="wsarearaster", use='val', value=1))
+execGRASS("r.mapcalc",
+          flags=c('overwrite'),
+          parameters=list(expression="ws_mask='wsarearaster'||'wsboundaryraster'"))
 execGRASS("r.mask", parameters=list(raster="ws_mask"))
 
 # Condidtion DEM and Create Flow Accumulation
 
 # First must remove any previous layers that could exist if there was a previous run
-if (!watershed.isnew){
-  execGRASS("g.remove",
-            parameters=list(rast="dem-filled-15,dem-filled-dir-15,dem-filled-carved-15,dem-filled-carved-dir-15,flow-dir-15,flow-accumulation-tf-15,dem-hydrodem-15,flow-accumulation-ws-15,flow-dir-ws-15,flow-accumulation-ws-15-abs"))
-}
+execGRASS("g.remove",
+          parameters=list(rast="dem-filled-15,dem-filled-dir-15,dem-filled-carved-15,dem-filled-carved-dir-15,flow-dir-15,flow-accumulation-tf-15,dem-hydrodem-15,flow-accumulation-ws-15,flow-dir-ws-15,flow-accumulation-ws-15-abs"))
 
 execGRASS("g.region", parameters=list(rast="dem-15"))
 
@@ -131,10 +130,5 @@ execGRASS("r.out.arc", flags=c("overwrite"), parameters=list(input='flow-dir-ws-
 ### From Flow Accumulation, invoke make_rout.sh to create 1/16th Flow Direction ###
 setwd(code.dir)
 print(getwd())
-A <- system2(paste("./make_rout.sh", file.path(tempfiles, 'flow-acc-15.asc'), sep=' '))
+A <- system2(paste(file.path(code.dir, "make_rout.sh"), file.path(tempfiles, 'flow-acc-15.asc'), sep=' '))
 if (A != 0) { stop("Routing script had errors") }
-
-execGRASS("r.in.arc", flags=c("overwrite"), parameters=list(input='flow-dir-16th.asc', output='flow-dir-16th-vic'))
-
-
-
