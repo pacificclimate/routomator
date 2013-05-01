@@ -1,4 +1,5 @@
 import math
+import argparse
 
 EARTH_CIRCUMFERENCE = 6378137 # earth circumference in meters
 
@@ -31,7 +32,7 @@ def great_circle_distance(latlong_a, latlong_b):
          math.sin(dLon / 2) * math.sin(dLon / 2))
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     d = EARTH_CIRCUMFERENCE * c
-    return d
+    return str(d)
 
 def cell_distance(direction, north, east, south, west):
     """
@@ -48,7 +49,7 @@ def cell_distance(direction, north, east, south, west):
     6   5   4
     """
 
-    if direction == '0': return 0
+    if direction == '0': return '0'
     # convert numerical grass directions to common format
     replacements = {'1':'N', '2': 'NE', '3': 'E', '4': 'SE', '5': 'S', '6': 'SW', '7': 'W', '8': 'NW'}
     for i, j in replacements.iteritems():
@@ -106,15 +107,34 @@ def direction_to_distance(dirs):
             dirs[i][j] = cell_distance(dirs[i][j], *cell_coords(i, j))
     return dirs
 
-def test():
-    print cell_distance('1', 49, -105, 48, -106)
-    
-    dirs = []
-    with open('/home/data/projects/hydrology/vic/data/routomator/tests/flow_peac_0625dd.txt', 'rU') as f:
-        dirs = [x.strip().split(' ') for x in f.readlines()[6:]]
-        
+def main(args):
+    with open(args.input, 'rU') as f:
+        dirs = [x.strip().split() for x in f.readlines()[6:]]
     xmask = direction_to_distance(dirs)
-    print xmask
 
+    header = '''ncols         400
+nrows         208
+xllcorner     -139
+yllcorner     48
+cellsize      0.0625
+NODATA_value  0
+'''
+    with open(args.output, 'wb') as f:
+        f.write(header)
+        for row in xmask:
+            try:
+                f.write(' '.join(row))
+                f.write('\n')
+            except TypeError:
+                print row
 if __name__ == '__main__':
-    test()
+    parser = argparse.ArgumentParser(description='XMask file creator')
+    parser.add_argument('-i', '--input',
+                        default = r'/home/data/projects/hydrology/vic/data/routomator/output/flow-dir-16th-corrected.asc',
+                        help = 'Input direction ascii')
+    parser.add_argument('-o', '--output',
+                        default = r'/home/data/projects/hydrology/vic/data/routomator/output/xmask.asc',
+                        help = 'Base directory you would like to put the output folder')
+    args = parser.parse_args()
+    main(args)
+

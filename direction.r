@@ -21,14 +21,7 @@ tryCatch({
   ## if creating mapset for the first time
   x <- execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location=location))
 
-  if (x == 0) {
-    ## watershed creation successful, must do prepwork
-    ## create watershed boundary based on subbasin selections
-    d <- dirname(cwb)
-    f <- sub("\\.[^.]*$", "", basename(cwb))
-    query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
-    execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
-  } else {
+  if (x != 0) {
     ## watershed was already created, just switch into it
     x <- execGRASS("g.mapset", parameters=list(mapset=watershed))
     if (x != 0) {
@@ -37,6 +30,15 @@ tryCatch({
       stop('Mapset creation/switch error')
     }
   }
+  ## watershed creation successful, must do prepwork
+  ## create watershed boundary based on subbasin selections
+  ## d <- dirname(cwb)
+  ## f <- sub("\\.[^.]*$", "", basename(cwb))
+  query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
+  print(query)
+  ## x <- execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
+  x <- execGRASS("v.extract", flags=c('d','overwrite'), parameters=list(input="cwb@PERMANENT", output="ws", where=query))
+  if (x != 0) { stop('Unable to create watershed boundary from subbasin query')}
 
   if (verbose){
     ## make sure we have all the necessary layers

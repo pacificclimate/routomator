@@ -19,14 +19,6 @@ plot.grass <- function(layer, type) {
 ext = extent(-139, -114, 47, 61)
 extent_raster <- raster(nrows=224, ncols=400, ext=ext)
 
-header <- 'ncols         400
-nrows         224
-xllcorner     -139
-yllcorner     47
-cellsize      0.0625
-NODATA_value  0
-'
-
 ####################################
 ##### Preprocess Watersheds  #######
 ####################################
@@ -44,14 +36,6 @@ cwb.ogr <- readOGR(d, f, stringsAsFactors = FALSE)
 watersheds <- cwb.ogr[cwb.ogr$WTRSHDGRPC %in% subbasins,]
 watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons)))
 
-## Open province layer to clip any anything else to before processing
-
-d <- dirname(extent_shapefile)
-f <- sub("\\.[^.]*$", "", basename(extent_shapefile))
-
-extent.shp <- readOGR(d, f, stringsAsFactors = FALSE)
-
-Fraction file define determination of subbasins
 
 ####################################
 ##### Create Fraction Raster #######
