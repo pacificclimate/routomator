@@ -1,5 +1,6 @@
 import math
 import argparse
+import os
 
 EARTH_CIRCUMFERENCE = 6378137 # earth circumference in meters
 
@@ -108,6 +109,9 @@ def direction_to_distance(dirs):
     return dirs
 
 def main(args):
+    assert args.watershed is not None, 'Watershed argument missing'
+    assert args.input is not None, 'Must provide input direction raster'
+
     with open(args.input, 'rU') as f:
         dirs = [x.strip().split() for x in f.readlines()[6:]]
     xmask = direction_to_distance(dirs)
@@ -119,22 +123,30 @@ yllcorner     48
 cellsize      0.0625
 NODATA_value  0
 '''
-    with open(args.output, 'wb') as f:
+
+    outfile = os.path.join(args.outdir, args.watershed, 'xmask.asc')
+
+    with open(outfile, 'wb') as f:
         f.write(header)
         for row in xmask:
             try:
                 f.write(' '.join(row))
                 f.write('\n')
-            except TypeError:
-                print row
+            except TypeError, e:
+                pass
+        print 'File saved to: ' + outfile
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XMask file creator')
     parser.add_argument('-i', '--input',
-                        default = r'/home/data/projects/hydrology/vic/data/routomator/output/flow-dir-16th-corrected.asc',
+                        default = None,
                         help = 'Input direction ascii')
-    parser.add_argument('-o', '--output',
-                        default = r'/home/data/projects/hydrology/vic/data/routomator/output/xmask.asc',
+    parser.add_argument('-o', '--outdir',
+                        default = r'/home/data/projects/hydrology/vic/data/routomator/output',
                         help = 'Base directory you would like to put the output folder')
+    parser.add_argument('-w', '--watershed',
+                        default = None,
+                        help = 'Watershed being processed.  Necessary to determine output folder')
     args = parser.parse_args()
     main(args)
 
