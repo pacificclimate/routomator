@@ -34,8 +34,8 @@ cwb.ogr <- readOGR(d, f, stringsAsFactors = FALSE)
 
 # sub <- cwb.ogr[cwb.ogr$WTRSHDGRPC=='REVL',]
 watersheds <- cwb.ogr[cwb.ogr$WTRSHDGRPC %in% subbasins,]
-watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons)))
-
+watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons)), avoidUnaryUnion=TRUE)
+#watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons))) # ERRORS with geos/rgdal
 
 ####################################
 ##### Create Fraction Raster #######
