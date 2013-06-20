@@ -3,7 +3,9 @@ import argparse
 
 from raster import Raster
 
-class BreakIt(Exception): pass
+class BreakIt(Exception):
+    # Custom exception class to break out of nested loop
+    pass
 
 def find_invalids():
     pass
@@ -63,7 +65,7 @@ def main(args):
                 try:
                     if r.raster[i][j] != '0':
                         r.raster[x][y] = find_direction((x,y),(i,j))
-                        raise BreakIt
+                        raise BreakIt # Use custom excpetion to jump out of nested loop
                 except IndexError:
                     continue
         except BreakIt:
