@@ -1,6 +1,8 @@
 import os
 import argparse
 
+from raster import Raster
+
 class BreakIt(Exception): pass
 
 def find_invalids():
@@ -40,13 +42,12 @@ def find_neighbors(dirs, x, y, verbose=False):
 def main(args):
     if args.watershed is None: assert 'Watershed argument missing'
 
-    dirs = []
-    with open(args.input, 'rU') as f:
-        dirs = [x.strip().split() for x in f.readlines()[6:]]
+    r = Raster()
+    r.load_ascii(args.input)
     
     # find all invalid values
     invalids = []
-    for i, row in enumerate(dirs):
+    for i, row in enumerate(r.raster):
         for j, value in enumerate(row):
             if value == '-9':
                 invalids.append((i, j))
@@ -55,13 +56,13 @@ def main(args):
     # fix all invalid values
     for x, y in invalids:
         try:
-            print 'Fixing direction {} found at {}, {}'.format(dirs[x][y],x, y)
-            neighbors = find_neighbors(dirs, x, y, True)
+            print 'Fixing direction {} found at {}, {}'.format(r.raster[x][y],x, y)
+            neighbors = find_neighbors(r.raster, x, y, True)
 
             for i, j in neighbors:
                 try:
-                    if dirs[i][j] != '0':
-                        dirs[x][y] = find_direction((x,y),(i,j))
+                    if r.raster[i][j] != '0':
+                        r.raster[x][y] = find_direction((x,y),(i,j))
                         raise BreakIt
                 except IndexError:
                     continue
@@ -69,21 +70,9 @@ def main(args):
             pass
     print 'Invalid Directions Fixed'
 
-    header = '''ncols         400
-nrows         208
-xllcorner     -139
-yllcorner     48
-cellsize      0.0625
-NODATA_value  0
-'''
     print 'Saving Output'
     outfile = os.path.join(args.outdir, args.watershed, 'flow-dir-16th-corrected.asc')
-    with open(outfile, 'w+') as f:
-        f.write(header)
-        for row in dirs:
-            f.write(" ".join(str(x) for x in row))
-            f.write('\n')
-    print 'Direction corrected raster saved to: ' + outfile
+    r.save_ascii(outfile)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Flow direction corrector')
