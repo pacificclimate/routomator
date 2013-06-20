@@ -53,13 +53,16 @@ def main(args):
         for j, value in enumerate(row):
             if value == '-9':
                 invalids.append((i, j))
-    print invalids
+
+    if args.verbose:
+        print invalids
 
     # fix all invalid values
     for x, y in invalids:
         try:
-            print 'Fixing direction {} found at {}, {}'.format(r.raster[x][y],x, y)
-            neighbors = find_neighbors(r.raster, x, y, True)
+            if args.verbose:
+                print 'Fixing direction {} found at {}, {}'.format(r.raster[x][y],x, y)
+            neighbors = find_neighbors(r.raster, x, y, args.verbose)
 
             for i, j in neighbors:
                 try:
@@ -70,9 +73,9 @@ def main(args):
                     continue
         except BreakIt:
             pass
+
     print 'Invalid Directions Fixed'
 
-    print 'Saving Output'
     outfile = os.path.join(args.outdir, args.watershed, 'flow-dir-16th-corrected.asc')
     r.save_ascii(outfile)
 
@@ -87,5 +90,8 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdir',
                         default = r'/home/data/projects/hydrology/vic/data/routomator/output',
                         help = 'Output direction corrected ascii raster')
+    parser.add_argument('-v', '--verbose',
+                        default = False, action='store_true',
+                        help = 'Show additional progress information')
     args = parser.parse_args()
     main(args)
