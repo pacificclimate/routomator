@@ -31,7 +31,7 @@ class Raster(object):
             self.raster = [x.strip().split() for x in f.readlines()]
         print 'Done loading raster'
 
-    def to_ascii(self, outfile):
+    def save_ascii(self, outfile):
         print 'Saving raster to {}'.format(os.path.basename(outfile))
         with open(outfile, 'w+') as f:
             f.write(self.header)
