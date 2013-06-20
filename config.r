@@ -2,8 +2,6 @@
 # Any neccessary options must be here
 
 
-# You should not need to change the following lines.  They are for data setup only.
-
 
 # What watershed are we calculating for?
 watershed <- 'columbia'
