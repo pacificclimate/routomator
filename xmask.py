@@ -61,13 +61,13 @@ def cell_distance(direction, north, east, south, west):
     hmid = (math.fabs(west) + math.fabs(east)) / 2
 
     if direction in ['N', 'S']:
-        return great_circle_distance((hmid, north), (hmid, south))
+        return great_circle_distance((north, hmid), (south, hmid))
     if direction in ['NE', 'SW']:
-        return great_circle_distance((west, south), (east, north))
+        return great_circle_distance((south, west), (north, east))
     if direction in ['E', 'W']:
-        return great_circle_distance((west, vmid), (east, vmid))
+        return great_circle_distance((vmid, west), (vmid, east))
     if direction in ['SE', 'NW']:
-        return great_circle_distance((west, north), (east, south))
+        return great_circle_distance((north, west), (south, east))
 
 def cell_coords(i, j, **kwargs):
     ncols = 400
