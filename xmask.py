@@ -2,6 +2,8 @@ import math
 import argparse
 import os
 
+from raster import Raster
+
 EARTH_CIRCUMFERENCE = 6378137 # earth circumference in meters
 
 def great_circle_distance(latlong_a, latlong_b):
@@ -88,53 +90,25 @@ def cell_coords(i, j, **kwargs):
 
     return cell_north, cell_east, cell_south, cell_west
     
-def direction_to_distance(dirs):
-    params = {
-        'ncols': 400,
-        'nrows': 208,
-        'xllcorner': -139,
-        'yllcorner': 48,
-        'cellsize': 0.0625
-        }
-    ncols = 400
-    nrows = 208
-    xllcorner = -139
-    yllcorner = 48
-    cellsize = 0.0625
-
-    # edit the table in place fetching distances
-    for i in range(nrows):
-        for j in range(ncols):
-            dirs[i][j] = cell_distance(dirs[i][j], *cell_coords(i, j))
-    return dirs
+def direction_to_distance(r):
+    # edit the raster in place fetching distances
+    for i in range(int(r.nrows)):
+        for j in range(int(r.ncols)):
+            r.raster[i][j] = cell_distance(r.raster[i][j], *cell_coords(i, j))
+    return r.raster
 
 def main(args):
     assert args.watershed is not None, 'Watershed argument missing'
     assert args.input is not None, 'Must provide input direction raster'
 
-    with open(args.input, 'rU') as f:
-        dirs = [x.strip().split() for x in f.readlines()[6:]]
-    xmask = direction_to_distance(dirs)
+    r = Raster()
+    r.load_ascii(args.input)
+    r2 = Raster()
+    r2.load_ascii(args.input)
+    r2.raster = direction_to_distance(r)
+    print r2 == r
 
-    header = '''ncols         400
-nrows         208
-xllcorner     -139
-yllcorner     48
-cellsize      0.0625
-NODATA_value  0
-'''
-
-    outfile = os.path.join(args.outdir, args.watershed, 'xmask.asc')
-
-    with open(outfile, 'wb') as f:
-        f.write(header)
-        for row in xmask:
-            try:
-                f.write(' '.join(row))
-                f.write('\n')
-            except TypeError, e:
-                pass
-        print 'File saved to: ' + outfile
+    r.save_ascii(os.path.join(args.outdir, args.watershed, 'xmask.asc'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XMask file creator')
