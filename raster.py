@@ -22,12 +22,12 @@ class Raster(object):
     def load_ascii(self, infile):
         print 'Loading raster {}'.format(os.path.basename(infile))
         with open(infile, 'rU') as f:
-            self.ncols = f.readline().strip().split()[1]
-            self.nrows = f.readline().strip().split()[1]
-            self.xll = f.readline().strip().split()[1]
-            self.yll = f.readline().strip().split()[1]
-            self.cellsize = f.readline().strip().split()[1]
-            self.nodata = f.readline().strip().split()[1]
+            self.ncols = int(f.readline().strip().split()[1])
+            self.nrows = int(f.readline().strip().split()[1])
+            self.xll = int(f.readline().strip().split()[1])
+            self.yll = int(f.readline().strip().split()[1])
+            self.cellsize = float(f.readline().strip().split()[1])
+            self.nodata = int(f.readline().strip().split()[1])
             self.raster = [x.strip().split() for x in f.readlines()]
         print 'Done loading raster'
 
