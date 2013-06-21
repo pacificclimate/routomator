@@ -73,6 +73,13 @@ NODATA_value {5}
 '''.format(self.ncols, self.nrows, self.xll, self.yll, self.cellsize, self.nodata)
         return h
 
+    def cell_neighbors(self, xi, yi):
+        yr = range(max(0, yi-1), min(self.nrows, yi+2))
+        xr = range(max(0, xi-1), min(self.ncols, xi+2))
+        neighbors = [(i, j) for j in yr for i in xr if (i != xi or j != yi)]
+        return neighbors
+
+
 def test(f):
     import tempfile
     r1 = Raster()
@@ -87,6 +94,9 @@ def test(f):
         print r1.cell_index(45,45)
     except AssertionError, e:
         print e
+        
+    print r1.cell_neighbors(0,0)
+    print r1.cell_neighbors(50,50)
 
     with (tempfile.NamedTemporaryFile()) as f:
         r1.save_ascii(f.name)
