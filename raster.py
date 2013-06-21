@@ -52,6 +52,15 @@ class Raster(object):
         xi = next(i for i,v in enumerate(self.x_bnds) if v > lon) - 1
         yi = next(i for i,v in enumerate(self.y_bnds) if v > lat) - 1
         return yi, xi
+
+    def reset_to_nodata(self):
+        self.raster = [[self.nodata for i in xrange(self.ncols)] for j in xrange(self.nrows)]
+
+    def copy_dummy(self):
+        import copy
+        temp = copy.copy(self)
+        temp.reset_to_nodata()
+        return temp
     
     @property
     def header(self):
