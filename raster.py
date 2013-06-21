@@ -73,7 +73,7 @@ def test(f):
     print r1.cell_index(47.001, -138.95)
 
     with (tempfile.NamedTemporaryFile()) as f:
-        r1.to_ascii(f.name)
+        r1.save_ascii(f.name)
         r2 = Raster()
         r2.load_ascii(f.name)
         print r2
