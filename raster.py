@@ -29,6 +29,7 @@ class Raster(object):
             self.cellsize = float(f.readline().strip().split()[1])
             self.nodata = int(f.readline().strip().split()[1])
             self.raster = [x.strip().split() for x in f.readlines()]
+            self.generate_bounds()
         print 'Done loading raster'
 
     def save_ascii(self, outfile):
@@ -40,7 +41,16 @@ class Raster(object):
                 f.write('\n')
         print 'Done saving raster'
             
-        
+    def generate_bounds(self):
+        self.x_bnds = [self.xll + x * self.cellsize for x in range(self.ncols)]
+        self.y_bnds = [self.yll + y * self.cellsize for y in range(self.nrows)]
+    
+    def cell_index(self, lat, lon):
+        # based on an input lat/lon, return the i/j cell index from bottom left corner
+        xi = next(i for i,v in enumerate(self.x_bnds) if v > lon) - 1
+        yi = next(i for i,v in enumerate(self.y_bnds) if v > lat) - 1
+        return yi, xi
+    
     @property
     def header(self):
         h = '''NCOLS {0}
@@ -57,6 +67,11 @@ def test(f):
     r1 = Raster()
     r1.load_ascii(f)
     print r1
+    print r1.x_bnds
+    print r1.y_bnds
+    print r1.cell_index(52.65, -125.367)
+    print r1.cell_index(47.001, -138.95)
+
     with (tempfile.NamedTemporaryFile()) as f:
         r1.to_ascii(f.name)
         r2 = Raster()
