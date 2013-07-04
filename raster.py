@@ -64,10 +64,16 @@ class Raster(object):
     
     def cell_index(self, lat, lon):
         # based on an input lat/lon, return the i/j cell index from bottom left corner
-        assert self.xll < lon < self.xll + self.ncols * self.cellsize, 'Given lon not contained in raster'
-        assert self.yll < lat < self.yll + self.nrows * self.cellsize, 'Given lat not contained in raster'
-        xi = next(i for i,v in enumerate(self.x_bnds) if v > lon) - 1
-        yi = next(i for i,v in enumerate(self.y_bnds) if v > lat) - 1
+        max_lon = self.xll + (self.ncols * self.cellsize)
+        max_lat = self.yll + (self.nrows * self.cellsize)
+        # print "{} < {} < {}: {}".format(self.xll, lon, max_lon, self.xll < lon < max_lon)
+        # print "{} < {} < {}: {}".format(self.yll, lat, max_lat, self.yll < lat < max_lat)
+        if not self.xll < lon < max_lon:
+            raise ValueError('Given lon not contained in raster, lon must be between {} and {}, given {}'.format(self.xll, max_lon, lon))
+        if not self.yll < lat < max_lat:
+            raise ValueError('Given lat not contained in raster, lat must be between {} and {}, given {}'.format(self.yll, max_lat, lat))
+        xi = next(i for i,v in enumerate(self.x_bnds) if v + self.cellsize > lon)
+        yi = next(i for i,v in enumerate(self.y_bnds) if v + self.cellsize > lat)
         return yi, xi
 
     def reset_to_nodata(self):
@@ -106,10 +112,11 @@ def test(f):
     print r1.y_bnds
     print r1.cell_index(52.65, -125.367)
     print r1.cell_index(47.001, -138.95)
+    print r1.cell_index(60.98, -125)
     
     try:
         print r1.cell_index(45,45)
-    except AssertionError, e:
+    except ValueError, e:
         print e
         
     print r1.cell_neighbors(0,0)
