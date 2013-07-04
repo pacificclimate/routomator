@@ -3,8 +3,14 @@ import pdb
 
 class Raster(object):
     def __init__(self):
-        pass
-
+        self.raster = []
+        self.ncols = None
+        self.nrows = None
+        self.xll = None
+        self.yll = None
+        self.cellsize = None
+        self.nodata = None
+        
     def __str__(self):
         return 'Raster object of size {},{} anchored at {},{} with cell size {}'.format(
             self.ncols, self.nrows, self.xll, self.yll, self.cellsize, self.nodata)
@@ -18,6 +24,17 @@ class Raster(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def parse_ascii(self, s):
+        s = s.splitlines()
+        self.ncols = int(s[0].strip().split()[1])
+        self.nrows = int(s[1].strip().split()[1])
+        self.xll = int(s[2].strip().split()[1])
+        self.yll = int(s[3].strip().split()[1])
+        self.cellsize = float(s[4].strip().split()[1])
+        self.nodata = int(s[5].strip().split()[1])
+        self.raster = [x.strip().split() for x in s[6:]]
+        self.generate_bounds()
 
     def load_ascii(self, infile):
         print 'Loading raster {}'.format(os.path.basename(infile))
