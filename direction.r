@@ -30,6 +30,15 @@ tryCatch({
       stop('Mapset creation/switch error')
     }
   }
+
+  if (verbose){
+    ## list all available mapsets
+    execGRASS("g.mapsets", flags=c("l"))
+    ## list mapsets in current search path
+    execGRASS("g.mapsets", flags=c("p"))
+  }
+
+
   ## watershed creation successful, must do prepwork
   ## create watershed boundary based on subbasin selections
   ## d <- dirname(cwb)
@@ -40,6 +49,10 @@ tryCatch({
   x <- execGRASS("v.extract", flags=c('d','overwrite'), parameters=list(input="cwb@PERMANENT", output="ws", where=query))
   if (x != 0) { stop('Unable to create watershed boundary from subbasin query')}
 
+  x <- execGRASS("v.select", flags=c('overwrite'), parameters=list(ainput="hydat@PERMANENT", binput="ws", output="hydat_ws"))
+  if (x != 0) { stop('Unable to select hydat points within watershed boundary')}
+  
+  
   if (verbose){
     ## make sure we have all the necessary layers
     execGRASS("g.list", flags="f", parameters=list(type='rast'))
