@@ -36,7 +36,7 @@ f <- sub("\\.[^.]*$", "", basename(stream))
 execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, output="stream"))
 
 # import hydat
-hydat <- "/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat.shp"
+hydat <- "/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp"
 d <- dirname(hydat)
 f <- sub("\\.[^.]*$", "", basename(hydat))
 execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, output="hydat"))

@@ -20,6 +20,7 @@ method = 2 #choose method 1 or 2 for creating flow accumulation raster for flowg
 
 veg <- "/home/data/gis/vic_bc/vegetation/majority1km2_wgs84_BC.shp"
 cwb <- "/home/data/gis/basedata/BC_Water/BC_CWB/CWB_WS_GRP/CWB_WS_GRP_wgs1984.shp"
+stns <- "/home/data/gis/basedata/BC_Water/BC_Hydrometric_Stations/whse_bc_hydrometric_stations_gt_500km2_catch_wgs84.shp"
 gisBase <- "/home/data/projects/comp_support/software/grass7_trunk/dist.x86_64-unknown-linux-gnu"
 gisDbase <- '/home/data/projects/hydrology/vic/data/routomator/grassdata'
 location <- 'vic_routing_test3'
