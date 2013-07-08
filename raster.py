@@ -74,7 +74,7 @@ class Raster(object):
             raise ValueError('Given lat not contained in raster, lat must be between {} and {}, given {}'.format(self.yll, max_lat, lat))
         xi = next(i for i,v in enumerate(self.x_bnds) if v + self.cellsize > lon)
         yi = next(i for i,v in enumerate(self.y_bnds) if v + self.cellsize > lat)
-        return yi, xi
+        return (xi, yi)
 
     def reset_to_nodata(self):
         self.raster = [[self.nodata for i in xrange(self.ncols)] for j in xrange(self.nrows)]
@@ -96,7 +96,9 @@ NODATA_value {5}
 '''.format(self.ncols, self.nrows, self.xll, self.yll, self.cellsize, self.nodata)
         return h
 
-    def cell_neighbors(self, xi, yi):
+    def cell_neighbors(self, cell):
+        xi = cell[0]
+        yi = cell[1]
         yr = range(max(0, yi-1), min(self.nrows, yi+2))
         xr = range(max(0, xi-1), min(self.ncols, xi+2))
         neighbors = [(i, j) for j in yr for i in xr if (i != xi or j != yi)]
@@ -119,8 +121,8 @@ def test(f):
     except ValueError, e:
         print e
         
-    print r1.cell_neighbors(0,0)
-    print r1.cell_neighbors(50,50)
+    print r1.cell_neighbors((0,0))
+    print r1.cell_neighbors((50,50))
 
     with (tempfile.NamedTemporaryFile()) as f:
         r1.save_ascii(f.name)
