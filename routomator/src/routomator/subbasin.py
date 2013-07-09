@@ -1,5 +1,6 @@
 import operator
 from raster import Raster
+from station import Station
 
 class DirectionRaster(Raster):    
     def __init__(self):
@@ -112,18 +113,6 @@ class DirectionRaster(Raster):
                 up_cells.extend(self.all_upstream_cells(up_neighbor))
             return [source] + up_cells
 
-    def load_stations(self, station_list):
-        # loads the station list from an open file like object
-        import csv
-        s = csv.DictReader(station_list)
-
-        self.stations = []
-        for row in s:
-            self.stations.append(row)
-
-        for stn in self.stations:
-            stn['LAT'] = float(stn['LAT'])
-            stn['LONG'] = float(stn['LONG'])
 
     def count(self):
         count = 0
@@ -156,6 +145,9 @@ class DirectionRaster(Raster):
                 else:
                     self.raster[i][j] = other.raster[i][j]
                 
+    def downstream_stations(self, station):
+
+        
     def print_subbasin(self, station):
         print 'Subbasin mask for {}'.format(station)
         a = self.catchment((3,6))
