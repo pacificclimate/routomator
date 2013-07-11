@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from raster import Raster
+from raster import AsciiRaster
 
 class BreakIt(Exception):
     # Custom exception class to break out of nested loop

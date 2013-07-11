@@ -2,9 +2,9 @@ import operator
 from raster import Raster
 from station import Station
 
-class DirectionRaster(Raster):    
-    def __init__(self):
-        super(DirectionRaster, self).__init__()
+class DirectionRaster(AsciiRaster):    
+    def __init__(self, filepath):
+        super(DirectionRaster, self).__init__(filepath)
         """
         GRASS directions
         8   1   2
@@ -188,6 +188,7 @@ NODATA_value 0
 0 0 2 1 8 2 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
 """
+    
     """Test station data is set so that stations are at:
 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
@@ -195,16 +196,16 @@ NODATA_value 0
 0 0 0 0 0 0 0 0 0 0
 0 0 0 - 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 -
-0 0 0 - 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
+0 0 0 - 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
 0 0 0 0 0 0 0 0 0 0
     """
     
     stns = """ID,STATION,LAT,LONG,PROVINCE,GROSS_AREA,EFFECTIVE_
-"07EA001","FINLAY RIVER AT WARE",47.40375,-138.78125,"BC",8000,
-"07EA002","KWADACHA RIVER NEAR WARE",47.21875,-138.78125,"BC",2410,
-"07EA004","INGENIKA RIVER ABOVE SWANNELL RIVER",47.34125,-138.40625,"BC",10000,
+"07EA001","FINLAY RIVER AT WARE",47.34375,-138.78125,"BC",8000,
+"07EA002","KWADACHA RIVER NEAR WARE",47.15625,-138.78125,"BC",2410,
+"07EA004","INGENIKA RIVER ABOVE SWANNELL RIVER",47.28125,-138.40625,"BC",10000,
 """
     r = DirectionRaster()
     r.parse_ascii(data)
