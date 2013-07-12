@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 
 from routomator.raster import AsciiRaster
 
-test_data = """ncols 10
+raster_data = """ncols 10
 nrows 10
 xllcorner -139
 yllcorner 47
@@ -25,7 +25,23 @@ NODATA_value 0
 @pytest.fixture(scope="session")
 def raster():
     with NamedTemporaryFile('w', suffix='.txt') as f:
-        f.write(test_data)
+        f.write(raster_data)
         f.flush()
         r = AsciiRaster(f.name)
     return r
+
+from routomator.station import load_stations
+
+station_data = '''ID,STATION,LAT,LONG,PROVINCE,GROSS_AREA,EFFECTIVE_
+"07EA001","FINLAY RIVER AT WARE",47.34375,-138.78125,"BC",8000,
+"07EA002","KWADACHA RIVER NEAR WARE",47.15625,-138.78125,"BC",2410,
+"07EA004","INGENIKA RIVER ABOVE SWANNELL RIVER",47.28125,-138.40625,"BC",10000,
+'''
+
+@pytest.fixture(scope="session")
+def test_stations():
+    with NamedTemporaryFile('w', suffix='.csv') as f:
+        f.write(station_data)
+        f.flush()
+        stations = load_stations(f.name)
+    return stations
