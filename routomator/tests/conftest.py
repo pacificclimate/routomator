@@ -2,7 +2,7 @@ import pytest
 
 from tempfile import NamedTemporaryFile
 
-from routomator.raster import AsciiRaster
+from routomator.raster import AsciiRaster, DirectionRaster
 
 raster_data = """ncols 10
 nrows 10
@@ -28,6 +28,14 @@ def raster():
         f.write(raster_data)
         f.flush()
         r = AsciiRaster(f.name)
+    return r
+
+@pytest.fixture(scope="session")
+def dir_raster():
+    with NamedTemporaryFile('w', suffix='.txt') as f:
+        f.write(raster_data)
+        f.flush()
+        r = DirectionRaster(f.name)
     return r
 
 from routomator.station import load_stations
