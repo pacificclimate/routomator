@@ -1,11 +1,22 @@
+import os
+
 class Station(object):
     def __init__(self, long_name, lat, lon, short_name=None):
         if type(lat) != float or type(lon) != float:
             raise TypeError, 'Station lat/lon must be of type float'
         self.long_name = long_name
-        self.short_name = short_name
+        if short_name:
+            self.short_name = short_name
+        else:
+            self.short_name = long_name[:5]
         self.lat = lat
         self.lon = lon
+
+    def __str__(self):
+        return '{ln} ({sn}) at {lat}, {lon}'.format(ln = self.long_name, sn = self.short_name, lat = self.lat, lon = self.lon)
+
+    def __repr__(self):
+        return "%s(%r)" % (self.__class__, self.__dict__)
 
     def __eq__(self, other):
         return (isinstance(other, self.__class__)
@@ -40,11 +51,77 @@ def load_stations(station_csv):
             stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG'])))
     return stations
 
+def directly_downstream_station(station_list, (xi, yi), dir_raster):
+    station_coords = [station.raster_coords(dir_raster) for station in station_list]
+    next_cell = dir_raster.next_downstream_cell((xi, yi))
+    while next_cell is not None:
+        if next_cell in station_coords:
+            return next_cell
+        else: 
+            next_cell = dir_raster.next_downstream_cell(next_cell)
+    return None
+
+def generate_upstream_station_dict(station_list, dir_raster):
+    from collections import defaultdict
+    d = defaultdict(list)
+    for station in station_list:
+        coords = station.raster_coords(dir_raster)
+        ds_station = directly_downstream_station(station_list, coords, dir_raster)
+        if ds_station == None:
+            continue
+        d[ds_station].append(coords)
+    return d
+
+def generate_single_subbasin_mask(upstream_stations, dir_raster):
+    print upstream_stations
+    temp_raster = dir_raster.copy_dummy()
+    for station in upstream_stations:
+        station_catch = dir_raster.catchment(station)
+        temp_raster.union(station_catch)
+    return temp_raster
+
+def generate_subbasin_masks(station_list, dir_raster, outdir):
+    upsteam = generate_upstream_station_dict(station_list, dir_raster)
+    
+    headwater_stations = [station for station in station_list if station.coords() not in upstream.keys()]
+    for station in headwater_stations:
+        temp_raster = dir_raster.copy_dummy()
+        temp_raster.save(os.path.join(outdir, station.short_name))
+        del(temp_raster)
+
+    interior_stations = [station for station in station_list if station.coords() not in upstream.keys()]
+    for station in interior_stations:
+        temp_raster = generate_single_subbasin_mask(upstream[station.raster_coords()], dir_raster)
+        temp_raster.save(os.path.join(outdir, station.short_name))
+        del(temp_raster)
+
+def station_file(self):
+    stnlist = sorted(self.stations, key=lambda k:k['count'])
+    for stn in stnlist:
+        xi, yi = self.cell_index(stn['LAT'], stn['LONG'])
+        yi = self.y_coord_to_vic(yi)
+        print '1\t0\t{stn}\t{xi}\t{yi}\t-999\t0\nNONE'.format(stn=station_id(stn['STATION']), xi=xi, yi=yi)
+
+def find_station_by_coords(station_list, (xi, yi)):
+    raise NotImplemented
+
 def generate_shortnames(station_list):
     '''
     Documentations...
     '''
-    raise NotImplemented
+    # First try to use first 5 letters
+    long_names = [stn.long_name for stn in station_list]
+    short_names = [x[:5] for x in long_names]
+    if len(long_names) == len(set(short_names)):
+        for  (stn, name) in zip(station_list, short_names):
+            stn.short_name = name
+            return
+
+    # There was some overlap, must deal
+    from colletions import Counter
+    cnt = Counter()
+    for short_name in short_names:
+        cnt[short_name] += 1
 
 if __name__ == '__main__':
     raise RuntimeError
