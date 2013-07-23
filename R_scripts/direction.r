@@ -52,6 +52,8 @@ tryCatch({
   x <- execGRASS("v.select", flags=c('overwrite'), parameters=list(ainput="hydat@PERMANENT", binput="ws", output="hydat_ws"))
   if (x != 0) { stop('Unable to select hydat points within watershed boundary')}
   
+  # Export hydat as csv to tempdir
+  execGRASS("v.out.ogr", parameters=list(input="hydat_ws", dsn=tempfiles))
   
   if (verbose){
     ## make sure we have all the necessary layers
