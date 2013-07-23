@@ -28,6 +28,17 @@ class AsciiRaster(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+    
+    @property
+    def header(self):
+        h = '''NCOLS {0}
+NROWS {1}
+XLLCORNER {2}
+YLLCORNER {3}
+CELLSIZE {4}
+NODATA_value {5}
+'''.format(self.ncols, self.nrows, self.xll, self.yll, self.cellsize, self.nodata)
+        return h
 
     def save(self, outfile):
         print 'Saving raster to {}'.format(os.path.basename(outfile))
@@ -37,7 +48,19 @@ class AsciiRaster(object):
                 f.write(' '.join(str(x) for x in row))
                 f.write('\n')
         print 'Done saving raster'
-            
+
+    def print_raster(self):
+        for row in self.raster:
+            print row
+
+    def union(self, other):
+        for i in range(self.nrows):
+            for j in range(self.ncols):
+                if self.raster[i][j] != str(self.nodata):
+                    continue
+                else:
+                    self.raster[i][j] = other.raster[i][j]
+
     def vic_coords(self, (lat, lon)):
         # based on an input lat/lon, return the i/j cell index from bottom left corner
         max_lon = self.xll + (self.ncols * self.cellsize)
@@ -61,24 +84,30 @@ class AsciiRaster(object):
         return (xi, self.nrows - (yi+1))
     
     def reset_to_nodata(self):
-        self.raster = [[self.nodata for i in xrange(self.ncols)] for j in xrange(self.nrows)]
+        self.raster = [[str(self.nodata) for i in xrange(self.ncols)] for j in xrange(self.nrows)]
+
+    def change_nodata(self, new_nodata):
+        current_nodata = str(self.nodata)
+        new_nodata = str(new_nodata)
+        for i in range(len(self.raster)):
+            for j in range(len(self.raster[i])):
+                if self.raster[i][j] == current_nodata:
+                    self.raster[i][j] = new_nodata
+        self.nodata = int(new_nodata)
 
     def copy_dummy(self):
         import copy
         temp = copy.copy(self)
         temp.reset_to_nodata()
         return temp
-    
-    @property
-    def header(self):
-        h = '''NCOLS {0}
-NROWS {1}
-XLLCORNER {2}
-YLLCORNER {3}
-CELLSIZE {4}
-NODATA_value {5}
-'''.format(self.ncols, self.nrows, self.xll, self.yll, self.cellsize, self.nodata)
-        return h
+
+    def count(self):
+        count = 0
+        for row in self.raster:
+            for val in row:
+                if val != self.nodata:
+                    count += 1
+        return count
 
     def cell_neighbors(self, (xi, yi)):
         yr = range(max(0, yi-1), min(self.nrows, yi+2))
@@ -106,33 +135,26 @@ class DirectionRaster(AsciiRaster):
                           '7': (-1, 0),            '3': (1,0),
                           '6': (-1,1),'5': (0,1),'4': (1,1)
                           }
-    
-    def _rerserve_dir(self, d):
-        raise NotImplemented
 
-    def _cell_direction(self, cell):
-        return self.raster[cell[1]][cell[0]]
-    
-    def reverse_flow(self):
-        raise NotImplemented
+    def _cell_direction(self, (xi, yi)):
+        return self.raster[yi][xi]
         
-    def next_downstream_cell(self, source):
+    def next_downstream_cell(self, (xi, yi)):
         # Returns an xi, yi, tuple of the downstream cell
-        direction = self._cell_direction(source)
+        direction = self._cell_direction((xi, yi))
         if direction == str(self.nodata) or direction == '-9':
             return None
-        return(tuple(map(operator.add, source, self.cell_diff[direction])))
+        return(tuple(map(operator.add, (xi, yi), self.cell_diff[direction])))
 
-    def all_downstream_cells(self, cell):
+    def all_downstream_cells(self, (xi, yi)):
         # Returns a list of tuples containing all the downstream cells from the source
-        next_cell = self.next_downstream_cell(cell)
-        print cell, next_cell
+        next_cell = self.next_downstream_cell((xi, yi))
         if not next_cell:
-            return [cell]
+            return [(xi, yi)]
         else:
-            return [cell] + self.all_downstream_cells(next_cell)
+            return [(xi, yi)] + self.all_downstream_cells(next_cell)
         
-    def is_downstream(self, source, dest):
+    def _is_downstream(self, source, dest):
         # takes xi,yi tuples and returns True if the flow direction connects source to dest
 
         # basic check if adjacent cells
@@ -141,20 +163,16 @@ class DirectionRaster(AsciiRaster):
 
         return dest == self.next_downstream_cell(source)
 
-    def catchment(self, source):
+    def catchment(self, (xi, yi)):
         # based on an input direction raster and a lat/lon, this generates a new raster
         # representing the entire catchment area of that point
 
         temp = self.copy_dummy()
 
-        for cell in self.all_upstream_cells(source):
-            temp.raster[cell[1]][cell[0]] = 1
-        temp.raster[source[1]][source[0]] = 2
+        for (xn, yn) in self.all_upstream_cells((xi, yi)):
+            temp.raster[yn][xn] = '1'
+        temp.raster[yi][xi] = '2'
         return temp
-
-    def print_raster(self):
-        for row in self.raster:
-            print row
             
     def print_directions(self):
         printable = []
@@ -175,11 +193,11 @@ class DirectionRaster(AsciiRaster):
         for row in printable:
             print ' '.join(row)
         
-    def directly_upstream_cells(self, source):
+    def directly_upstream_cells(self, (xi, yi)):
         res = []
-        for neighbor in self.cell_neighbors(source):
+        for neighbor in self.cell_neighbors((xi, yi)):
             # print '{} -> {} in direction {}'.format(neighbor, source, self._cell_direction(neighbor)),
-            if self.is_downstream(neighbor, source):
+            if self._is_downstream(neighbor, (xi, yi)):
                 # print 'yes'
                 res.append(neighbor)
                 # print res
@@ -197,39 +215,11 @@ class DirectionRaster(AsciiRaster):
             for up_neighbor in up_neighbors:
                 up_cells.extend(self.all_upstream_cells(up_neighbor))
             return [source] + up_cells
-
-
-    def count(self):
-        count = 0
-        for row in self.raster:
-            for val in row:
-                if val != self.nodata:
-                    count += 1
-        return count
     
-    def upstream_stations(self, source):
-
-        pass
-
     def y_coord_to_vic(self, yi):
         return self.nrows - (yi+1)
         pass
-    
-    def station_file(self):
-        stnlist = sorted(self.stations, key=lambda k:k['count'])
-        for stn in stnlist:
-            xi, yi = self.cell_index(stn['LAT'], stn['LONG'])
-            yi = self.y_coord_to_vic(yi)
-            print '1\t0\t{stn}\t{xi}\t{yi}\t-999\t0\nNONE'.format(stn=station_id(stn['STATION']), xi=xi, yi=yi)
-
-    def union(self, other):
-        for i in range(self.nrows):
-            for j in range(self.ncols):
-                if self.raster[i][j] != self.nodata:
-                    continue
-                else:
-                    self.raster[i][j] = other.raster[i][j]
-                
+         
     def print_subbasin(self, station):
         print 'Subbasin mask for {}'.format(station)
         a = self.catchment((3,6))
