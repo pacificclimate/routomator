@@ -14,7 +14,6 @@ outdir <- file.path('/home/data/projects/hydrology/vic/data/routomator/output', 
 dir.create(outdir)
 tempfiles <- '/home/data/projects/hydrology/vic/data/routomator/tempfiles'
 verbose <- TRUE
-method <- 2 #choose method 1 or 2 for creating flow accumulation raster for flowgen.c
 
 # GRASS7 settings - You should not need to change these unless on a different machine or something
 
