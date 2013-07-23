@@ -29,12 +29,6 @@ d <- dirname(cwb)
 f <- sub("\\.[^.]*$", "", basename(cwb))
 execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, output="cwb"))
 
-# import streams
-stream <- "/home/data/gis/basedata/BC_Water/BC_CWB/CWB_STRM_N/bc_cwb_streams_order_6_and_greater_WGS84.shp"
-d <- dirname(stream)
-f <- sub("\\.[^.]*$", "", basename(stream))
-execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, output="stream"))
-
 # import hydat
 hydat <- "/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp"
 d <- dirname(hydat)
