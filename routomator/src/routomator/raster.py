@@ -79,7 +79,6 @@ NODATA_value {5}
         '''
         Based on an input (lat,lon), this returns the raster index counting from top left
         '''
-        print lat, lon
         (xi, yi) = self.vic_coords((lat,lon))
         return (xi, self.nrows - (yi+1))
     
@@ -123,10 +122,18 @@ class DirectionRaster(AsciiRaster):
         8   1   2
         7   x   3
         6   5   4
+        
+        ArcGIS directions
+        32  64  128
+        16  x   1
+        8   4   2
+        9 = outlet = nodata for ArcGIS
+
         """
 
         self.cardinal = {'1':'N', '2': 'NE', '3': 'E', '4': 'SE', '5': 'S', '6': 'SW', '7': 'W', '8': 'NW'}
         self.numerical = {'N': '1', 'NE': '2', 'E': '3', 'SE': '4', 'S': '5', 'SW': '6', 'W': '7', 'NW': '8'}
+        self.arcgis = {'1':'64', '2': '128', '3': '1', '4': '2', '5': '4', '6': '8', '7': '16', '8': '32'}
         self.print_replace = {'1':'|', '2': '/', '3': '-', '4': r'\\', '5': '|', '6': '/', '7': '-', '8': r'\\'}
 
         # cell difference Y vaules are counterintuitive...
@@ -138,11 +145,27 @@ class DirectionRaster(AsciiRaster):
 
     def _cell_direction(self, (xi, yi)):
         return self.raster[yi][xi]
+
+    def save_arcgis(self, outfile):
+        print 'Saving raster to {}'.format(os.path.basename(outfile))
+        with open(outfile, 'w+') as f:
+            f.write(self.header)
+            for row in self.raster:
+                new_row = []
+                for val in row:
+                    if val in self.arcgis.keys():
+                        new_row.append(self.arcgis[val])
+                    else:
+                        new_row.append(self.nodata)
+
+                f.write(' '.join(str(x) for x in new_row))
+                f.write('\n')
+        print 'Done saving raster'
         
     def next_downstream_cell(self, (xi, yi)):
         # Returns an xi, yi, tuple of the downstream cell
         direction = self._cell_direction((xi, yi))
-        if direction == str(self.nodata) or direction == '-9':
+        if direction == str(self.nodata) or direction == '9':
             return None
         return(tuple(map(operator.add, (xi, yi), self.cell_diff[direction])))
 
