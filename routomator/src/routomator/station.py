@@ -8,7 +8,14 @@ class Station(object):
         if short_name:
             self.short_name = short_name
         else:
-            self.short_name = long_name[:5]
+            words = self.long_name.split()[:5]
+            if len(words) == 5:
+                self.short_name = ''.join([x[0] for x in words])
+            else:
+                suffix = ''.join([x[0] for x in words[1:]])
+                prefix = words[0][:(6-len(words))]
+                self.short_name = prefix + suffix
+            self.short_name = ''.join([x[0] for x in self.long_name.split()])[:5]
         self.lat = lat
         self.lon = lon
 
@@ -73,7 +80,6 @@ def generate_upstream_station_dict(station_list, dir_raster):
     return d
 
 def generate_single_subbasin_mask(upstream_stations, dir_raster):
-    print upstream_stations
     temp_raster = dir_raster.copy_dummy()
     for station in upstream_stations:
         station_catch = dir_raster.catchment(station)
@@ -81,18 +87,18 @@ def generate_single_subbasin_mask(upstream_stations, dir_raster):
     return temp_raster
 
 def generate_subbasin_masks(station_list, dir_raster, outdir):
-    upsteam = generate_upstream_station_dict(station_list, dir_raster)
+    upstream = generate_upstream_station_dict(station_list, dir_raster)
     
-    headwater_stations = [station for station in station_list if station.coords() not in upstream.keys()]
+    headwater_stations = [station for station in station_list if station.raster_coords(dir_raster) not in upstream.keys()]
     for station in headwater_stations:
         temp_raster = dir_raster.copy_dummy()
-        temp_raster.save(os.path.join(outdir, station.short_name))
+        temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_headwater.asc'))
         del(temp_raster)
 
-    interior_stations = [station for station in station_list if station.coords() not in upstream.keys()]
+    interior_stations = [station for station in station_list if station.raster_coords(dir_raster) in upstream.keys()]
     for station in interior_stations:
-        temp_raster = generate_single_subbasin_mask(upstream[station.raster_coords()], dir_raster)
-        temp_raster.save(os.path.join(outdir, station.short_name))
+        temp_raster = generate_single_subbasin_mask(upstream[station.raster_coords(dir_raster)], dir_raster)
+        temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_test.asc'))
         del(temp_raster)
 
 def station_file(self):
@@ -104,6 +110,14 @@ def station_file(self):
 
 def find_station_by_coords(station_list, (xi, yi)):
     raise NotImplemented
+
+def shortname_conflicts(station_list):
+    long_names = [stn.long_name for stn in station_list]
+    short_names = [stn.short_name for stn in station_list]
+    if len(set(short_names)) == len(set(long_names)):
+        return False
+    else: 
+        return True
 
 def generate_shortnames(station_list):
     '''
