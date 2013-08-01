@@ -4,6 +4,8 @@ library(raster)
 library(rgdal)
 library(rgeos)
 
+source('watershed.r')
+
 plot.grass <- function(layer, type) {
     if (type == 'raster') {
         temp <- readRAST6(layer)
@@ -25,17 +27,7 @@ extent_raster <- raster(nrows=224, ncols=400, ext=ext)
 
 source('config.r')
 
-d <- dirname(cwb)
-f <- sub("\\.[^.]*$", "", basename(cwb))
-
-cwb.ogr <- readOGR(d, f, stringsAsFactors = FALSE)
-
-# Subset to desired subwatersheds
-
-# sub <- cwb.ogr[cwb.ogr$WTRSHDGRPC=='REVL',]
-watersheds <- cwb.ogr[cwb.ogr$WTRSHDGRPC %in% subbasins,]
-watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons)), avoidUnaryUnion=TRUE)
-#watersheds_merged <- unionSpatialPolygons(watersheds, ID=rep(1,time=length(watersheds@polygons))) # ERRORS with geos/rgdal
+watersheds_merged <- get.watershed.boundary(watershed)
 
 ####################################
 ##### Create Fraction Raster #######
@@ -64,7 +56,7 @@ velocity.raster[which(velocity.raster[]>0)] <- 2
 d <- dirname(veg)
 f <- sub("\\.[^.]*$", "", basename(veg))
 
-threshold <- 50
+threshold <- 30
 veg.shape <- readOGR(d, f, stringsAsFactors = FALSE)
 veg.shape.lakes <- veg.shape[veg.shape$GRIDCODE==20,]
 lakes.raster <- rasterize(veg.shape.lakes, extent_raster, getCover=TRUE)

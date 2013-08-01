@@ -6,6 +6,7 @@
 
 library(spgrass6)
 source('config.r')
+source('watershed.r')
 
 tryCatch({
   ## Load in existing location
@@ -19,7 +20,7 @@ tryCatch({
   }
 
   ## if creating mapset for the first time
-  x <- execGRASS("g.mapset", flags="c", parameters=list(mapset=watershed, location=location))
+  x <- execGRASS("g.mapset", flags=c("c", "quiet"), parameters=list(mapset=watershed, location=location))
 
   if (x != 0) {
     ## watershed was already created, just switch into it
@@ -31,87 +32,72 @@ tryCatch({
     }
   }
 
-  if (verbose){
-    ## list all available mapsets
-    execGRASS("g.mapsets", flags=c("l"))
-    ## list mapsets in current search path
-    execGRASS("g.mapsets", flags=c("p"))
-  }
-
-
   ## watershed creation successful, must do prepwork
   ## create watershed boundary based on subbasin selections
   ## d <- dirname(cwb)
   ## f <- sub("\\.[^.]*$", "", basename(cwb))
-  query <- paste("WTRSHDGRPC IN ('", paste(subbasins, collapse="', '"), "')", sep='')
-  print(query)
+  execGRASS("g.remove", flags=c("quiet"), parameters=list(vect="ws"))
+  ws = get.watershed.boundary(watershed)
+  x <- writeVECT6(ws, 'ws', v.in.ogr_flags=c('o'))
   ## x <- execGRASS("v.in.ogr", flags=c('o','overwrite'), parameters=list(dsn=d, layer=f, where=query, output="ws"))
-  x <- execGRASS("v.extract", flags=c('d','overwrite'), parameters=list(input="cwb@PERMANENT", output="ws", where=query))
+  #x <- execGRASS("v.extract", flags=c('d','overwrite', 'quiet'), parameters=list(input="cwb@PERMANENT", output="ws", where=query))
   if (x != 0) { stop('Unable to create watershed boundary from subbasin query')}
 
-  x <- execGRASS("v.select", flags=c('overwrite'), parameters=list(ainput="hydat@PERMANENT", binput="ws", output="hydat_ws"))
+  x <- execGRASS("v.select", flags=c('overwrite', 'quiet'), parameters=list(ainput="hydat@PERMANENT", binput="ws", output="hydat_ws"))
   if (x != 0) { stop('Unable to select hydat points within watershed boundary')}
   
   # Export hydat as csv to tempdir
-  execGRASS("v.out.ogr", parameters=list(input="hydat_ws", dsn=tempfiles))
-  
-  if (verbose){
-    ## make sure we have all the necessary layers
-    execGRASS("g.list", flags="f", parameters=list(type='rast'))
-    execGRASS("g.list", flags="f", parameters=list(type='vect'))
-  }
+  file.remove(file.path(tempfiles, 'hydat_ws.csv'))
+  execGRASS("v.out.ogr", flags=c('overwrite', 'quiet'), parameters=list(format="CSV", input="hydat_ws", dsn=file.path(tempfiles, 'hydat_ws.csv')))
 
   ## Mask All Raster Operations To Watershed Region
   ## unfortunately simply adding a mask sourced from a vector does not have any options on what
   ## to do about partial cells on boundary: must convert boundary to lines, lines to raster, and
   ## merge with mask from polygon to make sure boundaries are included.
   ## First remove all intermediate or output MASK layers
-  execGRASS("g.remove", parameters=list(rast="wsboundaryraster,wsarearaster,ws_mask,MASK", vect="wsdissolve,wsboundary,wsboundarynamed,wsboundaryline"))
+  execGRASS("g.remove", flags=c("quiet"), parameters=list(rast="wsboundaryraster,wsarearaster,MASK,ws_mask", vect="wsdissolve,wsboundary,wsboundarynamed,wsboundaryline"))
   execGRASS("v.db.addcolumn",
-            parameters=list(map="ws", columns="merge int"))
+            flags=c("quiet"), parameters=list(map="ws", columns="merge int"))
   execGRASS("v.db.update",
-            parameters=list(map="ws", column="merge", value="1"))
+            flags=c("quiet"), parameters=list(map="ws", column="merge", value="1"))
   execGRASS("v.dissolve",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="ws", output="wsdissolve", column="merge", layer='1'))
   execGRASS("v.type",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="wsdissolve", output="wsboundary", from_type="boundary", to_type="line"))
   execGRASS("v.category",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="wsboundary", output="wsboundarynamed", type="line", option="add", cat=as.integer(1)))
   execGRASS("v.clean",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="wsboundarynamed", output="wsboundaryline", type="line", tool="rmdac"))
   execGRASS("v.to.rast",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="wsboundaryline", output="wsboundaryraster", use='val', value=1))
   execGRASS("v.to.rast",
-            flags=c('overwrite'),
+            flags=c('overwrite', 'quiet'),
             parameters=list(input="wsdissolve", output="wsarearaster", use='val', value=1))
-  execGRASS("r.mapcalc",
-            flags=c('overwrite'),
-            parameters=list(expression="ws_mask='wsarearaster'||'wsboundaryraster'"))
+  execGRASS("r.patch",
+            flags=c('overwrite', 'quiet'),
+            parameters=list(input="wsarearaster,wsboundaryraster", output="ws_mask"))
   execGRASS("r.mask", parameters=list(raster="ws_mask"))
-  
   ## Condidtion DEM and Create Flow Accumulation
 
   ## First must remove any previous layers that could exist if there was a previous run
-  execGRASS("g.remove",
-            parameters=list(rast="dem-filled-15,dem-filled-dir-15,dem-filled-carved-15,dem-filled-carved-dir-15,flow-dir-15,flow-accumulation-tf-15,dem-hydrodem-15,flow-accumulation-ws-15,flow-dir-ws-15,flow-accumulation-ws-15-abs"))
+  #execGRASS("g.remove",
+  #          parameters=list(rast="dem-filled-15,dem-filled-dir-15,dem-filled-carved-15,dem-filled-carved-dir-15,flow-dir-15,flow-accumulation-tf-15,dem-hydrodem-15,flow-accumulation-ws-15,flow-dir-ws-15,flow-accumulation-ws-15-abs"))
 
   execGRASS("g.region", parameters=list(rast="dem-15"))
-
   execGRASS("g.region",
-            parameters=list(rast="dem-15"))
-  execGRASS("r.hydrodem",
-            flags=c("overwrite"),
-            parameters=list(input='dem-15', output="dem-hydrodem-15"))
+            flags=c("p"))
+  #execGRASS("r.hydrodem", flags=c("overwrite"), parameters=list(input='dem-15', output="dem-hydrodem-15"))
+  # r.hydrodem --overwrite input=dem-15 output=dem-hydrodem-15
   execGRASS("r.watershed",
             flags=c("overwrite", "s", "b"),
             parameters=list(elevation="dem-hydrodem-15", accumulation="flow-accumulation-ws-15", drainage="flow-dir-ws-15"))
   ## r.watershed uses negative values for outflow values on perimeter, must correct
-  execGRASS("r.mapcalc", parameters=list(expression="'flow-accumulation-ws-15-abs'=abs('flow-accumulation-ws-15')"))
+  execGRASS("r.mapcalc", flags=c("overwrite"), parameters=list(expression="'flow-accumulation-ws-15-abs'=abs('flow-accumulation-ws-15')"))
 
   execGRASS("r.stats", flags=c('p'), parameters=list(input='flow-accumulation-ws-15-abs'))
 
@@ -127,7 +113,7 @@ tryCatch({
 
   ## From Flow Accumulation, invoke make_rout.sh to create 1/16th Flow Direction ###
   print("Next command to run")
-  print(paste(file.path(code.dir, "make_rout.sh"),
+  print(paste(file.path(dirname(code.dir), "flowgen", "make_rout.sh"),
               file.path(tempfiles, 'flow-acc-15.asc'),
               file.path(tempfiles, 'flow-dir-16th.asc'),
                      sep=' '))
