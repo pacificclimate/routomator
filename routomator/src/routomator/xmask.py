@@ -2,7 +2,7 @@ import math
 import argparse
 import os
 
-from raster import Raster
+from raster import AsciiRaster
 
 EARTH_CIRCUMFERENCE = 6378137 # earth circumference in meters
 
@@ -101,14 +101,12 @@ def main(args):
     assert args.watershed is not None, 'Watershed argument missing'
     assert args.input is not None, 'Must provide input direction raster'
 
-    r = Raster()
-    r.load_ascii(args.input)
-    r2 = Raster()
-    r2.load_ascii(args.input)
+    r = AsciiRaster(args.input)
+    r2 = AsciiRaster(args.input)
     r2.raster = direction_to_distance(r)
     print r2 == r
 
-    r.save_ascii(os.path.join(args.outdir, args.watershed, 'xmask.asc'))
+    r.save(os.path.join(args.outdir, args.watershed, 'xmask.asc'))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XMask file creator')
