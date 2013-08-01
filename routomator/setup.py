@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-__version__ = (0, 0, 1)
+__version__ = (0, 0, 2)
 
 
 # Utility function to read the README file.
@@ -21,7 +21,7 @@ setup(
     url="http://www.pacificclimate.org/",
     package_dir = {'':'src'},
     packages=find_packages('src'),
-#    scripts = [""],
+    scripts = ['scripts/routobot.py'],
 #    requires=['pylumberjack (>=1.0)'],
     long_description=read('README')
     )
