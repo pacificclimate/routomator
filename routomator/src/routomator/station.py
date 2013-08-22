@@ -9,13 +9,12 @@ class Station(object):
             self.short_name = short_name
         else:
             words = self.long_name.split()[:5]
-            if len(words) == 5:
+            if len(words) >= 5:
                 self.short_name = ''.join([x[0] for x in words])
             else:
                 suffix = ''.join([x[0] for x in words[1:]])
                 prefix = words[0][:(6-len(words))]
                 self.short_name = prefix + suffix
-            self.short_name = ''.join([x[0] for x in self.long_name.split()])[:5]
         self.lat = lat
         self.lon = lon
 
@@ -98,7 +97,7 @@ def generate_subbasin_masks(station_list, dir_raster, outdir):
     interior_stations = [station for station in station_list if station.raster_coords(dir_raster) in upstream.keys()]
     for station in interior_stations:
         temp_raster = generate_single_subbasin_mask(upstream[station.raster_coords(dir_raster)], dir_raster)
-        temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_test.asc'))
+        temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_interior.asc'))
         del(temp_raster)
 
 def station_file(self):
@@ -123,19 +122,23 @@ def generate_shortnames(station_list):
     '''
     Documentations...
     '''
-    # First try to use first 5 letters
+    # First try to use frist letter of all words
     long_names = [stn.long_name for stn in station_list]
     short_names = [x[:5] for x in long_names]
     if len(long_names) == len(set(short_names)):
         for  (stn, name) in zip(station_list, short_names):
             stn.short_name = name
-            return
+            return station_list
 
-    # There was some overlap, must deal
-    from colletions import Counter
-    cnt = Counter()
+    # Find which names have overlap
+    s = set()
+    conflicts = []
     for short_name in short_names:
-        cnt[short_name] += 1
+        if short_name in s:
+            conflicts += short_name
+        s.add(short_name)
+
+    return station_list
 
 if __name__ == '__main__':
     raise RuntimeError

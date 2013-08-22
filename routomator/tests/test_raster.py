@@ -123,3 +123,33 @@ NODATA_value 2
 def test_change_nodata(input, expected):
     input.change_nodata(2)
     assert input.raster == expected.raster
+
+
+@pytest.mark.parametrize(('input', 'expected'), [
+    (dirraster_from_string("""ncols 5
+nrows 5
+xllcorner -139
+yllcorner 47
+cellsize 0.0625
+NODATA_value 0
+0 0 4 5 6
+0 0 4 5 6
+0 0 4 4 5
+0 0 3 3 3
+0 0 2 1 8
+"""), dirraster_from_string("""ncols 5
+nrows 5
+xllcorner -139
+yllcorner 47
+cellsize 0.0625
+NODATA_value 2
+0 0 1 1 1
+0 0 1 4 1
+0 0 1 7 1
+0 0 1 6 15
+0 0 1 1 1
+"""))
+    ])
+def test_accumulation(input, expected):
+    acc = input.accumulation
+    assert acc == expected

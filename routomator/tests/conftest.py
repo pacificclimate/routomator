@@ -38,6 +38,22 @@ def dir_raster():
         r = DirectionRaster(f.name)
     return r
 
+@pytest.fixture
+def raster_from_string(s):
+    with NamedTemporaryFile('w', suffix='.txt') as f:
+        f.write(s)
+        f.flush()
+        r = AsciiRaster(f.name)
+    return r
+
+@pytest.fixture
+def dirraster_from_string(s):
+    with NamedTemporaryFile('w', suffix='.txt') as f:
+        f.write(s)
+        f.flush()
+        r = DirectionRaster(f.name)
+    return r
+
 from routomator.station import load_stations
 
 station_data = '''ID,STATION,LAT,LONG,PROVINCE,GROSS_AREA,EFFECTIVE_

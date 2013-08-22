@@ -3,6 +3,7 @@ library(sp)
 library(raster)
 library(rgdal)
 library(rgeos)
+library(spgrass6)
 
 source('watershed.r')
 
@@ -18,8 +19,8 @@ plot.grass <- function(layer, type) {
 }
 
 # basic extent raster to be used for all files
-ext = extent(-139, -114, 47, 61)
-extent_raster <- raster(nrows=224, ncols=400, ext=ext)
+ext = extent(-169, -101, 40, 72)
+extent_raster <- raster(nrows=512, ncols=1088, ext=ext)
 
 ####################################
 ##### Preprocess Watersheds  #######
@@ -35,6 +36,11 @@ watersheds_merged <- get.watershed.boundary(watershed)
 
 fraction <- rasterize(watersheds_merged, extent_raster, getCover=TRUE)
 writeRaster(fraction, filename=file.path(outdir, 'fraction.asc'), overwrite=TRUE, NAflag=0)
+
+# Use fraction raster to create mask
+mask.raster <- fraction
+mask.raster[which(mask.raster[]>0)] <- 1
+writeRaster(mask.raster, filename=file.path(outdir, 'mask.asc'), overwrite=TRUE, NAflag=0)
 
 ####################################
 ##### Create Velocity Raster #######
@@ -90,4 +96,3 @@ diffusion.raster[which(diffusion.raster[]==0.3)] <- 1300
 
 # write out..
 writeRaster(diffusion.raster, filename=file.path(outdir, 'diffusion.asc'), overwrite=TRUE, NAflag=0)
-
