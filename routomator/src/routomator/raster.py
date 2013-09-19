@@ -197,6 +197,17 @@ class DirectionRaster(AsciiRaster):
         temp.raster[yi][xi] = '2'
         return temp
             
+    def catchment_mask(self, (xi, yi)):
+        # based on an input direction raster and a lat/lon, this generates a new raster
+        # representing the entire catchment area of that point
+
+        temp = self.copy_dummy()
+
+        for (xn, yn) in self.all_upstream_cells((xi, yi)):
+            temp.raster[yn][xn] = '1'
+        temp.raster[yi][xi] = '1'
+        return temp
+
     def print_directions(self):
         printable = []
         for row in self.raster:
