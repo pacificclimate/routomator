@@ -19,8 +19,7 @@ setup(
     description = ("VIC routing automation package"),
     keywords = "pcic hydrology dem raster routing",
     url="http://www.pacificclimate.org/",
-    package_dir = {'':'src'},
-    packages=find_packages('src'),
+    packages=find_packages('routomator'),
     scripts = ['scripts/routobot.py'],
 #    requires=['pylumberjack (>=1.0)'],
     long_description=read('README')
