@@ -13,17 +13,18 @@ from routomator.station import load_stations, generate_shortnames, generate_subb
 def main(args):
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     polygonize = ['gdal_polygonize.py', args.catchment, '-f', 'ESRI Shapefile', ws_shape]
-#    call(polygonize)
+    call(polygonize)
 
-    acc_cut = ['gdalwarp', '-of', 'AAIGrid', '-overwrite', '-cutline', ws_shape, args.accumulation, os.path.join(args.tempdir, 'accumulation_clipped.asc')]
+    acc_cut = ['gdalwarp', '-overwrite', '-cutline', ws_shape, args.accumulation, os.path.join(args.tempdir, 'accumulation_clipped.tif')]
     call(acc_cut)
-    exit()
 
+    acc_trans = ['gdal_translate', '-of', 'AAIGrid', os.path.join(args.tempdir, 'accumulation_clipped.tif'), os.path.join(args.tempdir, 'accumulation_clipped.asc')]
+    call(acc_trans)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Routomator master script')
 
-    parser.add_argument('-d', '--accumulation',
+    parser.add_argument('-a', '--accumulation',
                         default = r'/datasets/projects-hydrology/routomator/data/input/flow-acc-15.asc',
                         help = 'Input direction ascii raster')
     parser.add_argument('-c', '--catchment',
