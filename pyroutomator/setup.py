@@ -20,8 +20,11 @@ setup(
     keywords = "pcic hydrology dem raster routing",
     url="http://www.pacificclimate.org/",
     packages=find_packages('routomator'),
-    scripts = ['scripts/routobot.py'],
-    requires=['Shapely',
-              'rpy2'],
+    scripts = ['scripts/generate_fraction_file.py',
+               'scripts/generate_stations_subbasins.py',
+               'scripts/generate_vel_diff_file.py',
+               'scripts/generate_ws_catch.py',
+               'scripts/prep_accumulation.py'],
+    requires=['rpy2'],
     long_description=read('README')
     )
