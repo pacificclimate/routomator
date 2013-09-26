@@ -21,6 +21,7 @@ setup(
     url="http://www.pacificclimate.org/",
     packages=find_packages('routomator'),
     scripts = ['scripts/routobot.py'],
-#    requires=['pylumberjack (>=1.0)'],
+    requires=['Shapely',
+              'rpy2'],
     long_description=read('README')
     )

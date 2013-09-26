@@ -36,5 +36,3 @@ gawk '{if(NR==1) $2='"$CC"'; if(NR==2) $2='"$RR"'; if(NR==5) $2=0.0625; if(NR==6
 cat temp_newh.junk temp_fd.junk > $OUT
 
 rm -f temp*.junk
-
-echo "Done upscaling to 16th degree, next run: python flow_dir_correct.py -i "$OUT" -w WATERSHED"
