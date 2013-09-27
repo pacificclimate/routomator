@@ -70,55 +70,10 @@ def cell_distance(direction, north, east, south, west):
         return great_circle_distance((vmid, west), (vmid, east))
     if direction in ['SE', 'NW']:
         return great_circle_distance((north, west), (south, east))
-
-def cell_coords(i, j, **kwargs):
-    ncols = 400
-    nrows = 208
-    xllcorner = -139
-    yllcorner = 48
-    cellsize = 0.0625
-
-    max_west = xllcorner
-    max_north = yllcorner + (nrows * cellsize)
-    cellsize = 0.0625
-
-    cell_north = max_north - (i * cellsize)
-    cell_south = cell_north - cellsize
-
-    cell_west = max_west + (j * cellsize)
-    cell_east = cell_west + cellsize
-
-    return cell_north, cell_east, cell_south, cell_west
     
 def direction_to_distance(r):
     # edit the raster in place fetching distances
     for i in range(int(r.nrows)):
         for j in range(int(r.ncols)):
-            r.raster[i][j] = cell_distance(r.raster[i][j], *cell_coords(i, j))
+            r.raster[i][j] = cell_distance(r.raster[i][j], *r.cell_bounds(i, j))
     return r.raster
-
-def main(args):
-    assert args.watershed is not None, 'Watershed argument missing'
-    assert args.input is not None, 'Must provide input direction raster'
-
-    r = AsciiRaster(args.input)
-    r2 = AsciiRaster(args.input)
-    r2.raster = direction_to_distance(r)
-    print r2 == r
-
-    r.save(os.path.join(args.outdir, args.watershed, 'xmask.asc'))
-
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='XMask file creator')
-    parser.add_argument('-i', '--input',
-                        default = None,
-                        help = 'Input direction ascii')
-    parser.add_argument('-o', '--outdir',
-                        default = r'/home/data/projects/hydrology/vic/data/routomator/output',
-                        help = 'Base directory you would like to put the output folder')
-    parser.add_argument('-w', '--watershed',
-                        default = None,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
-    args = parser.parse_args()
-    main(args)
-

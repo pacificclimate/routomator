@@ -82,6 +82,19 @@ NODATA_value {5}
         (xi, yi) = self.vic_coords((lat,lon))
         return (xi, self.nrows - (yi+1))
     
+    def cell_bounds(self, xi, yi):
+        max_west = self.xll
+        max_north = self.yll + (self.nrows * self.cellsize)
+
+        cell_north = max_north - (xi * self.cellsize)
+        cell_south = cell_north - self.cellsize
+
+        cell_west = self.xll + (yi * self.cellsize)
+        cell_east = cell_west + self.cellsize
+
+        return cell_north, cell_east, cell_south, cell_west
+
+                    
     def reset_to_nodata(self):
         self.raster = [[str(self.nodata) for i in xrange(self.ncols)] for j in xrange(self.nrows)]
 

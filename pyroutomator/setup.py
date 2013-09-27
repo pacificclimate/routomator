@@ -24,7 +24,8 @@ setup(
                'scripts/generate_stations_subbasins.py',
                'scripts/generate_vel_diff_file.py',
                'scripts/generate_ws_catch.py',
-               'scripts/prep_accumulation.py'],
+               'scripts/prep_accumulation.py',
+               'scripts/generate_xmask.py'],
     install_requires=['rpy2'],
     long_description=read('README.txt')
     )
