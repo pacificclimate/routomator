@@ -56,9 +56,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--vegetation',
                         default = r'/home/data/gis/vic_bc/vegetation/majority1km2_wgs84_gen2_extent.shp',
                         help = 'Shapefile containing vegation layer')
-    parser.add_argument('-w', '--watershed',
-                        default = None, required=True,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
     parser.add_argument('-o', '--outdir',
                         default = r'/datasets/projects-hydrology/routomator/data/output',
                         help = 'Directory to store output files, must have write permissions')

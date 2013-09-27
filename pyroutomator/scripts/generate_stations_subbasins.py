@@ -13,37 +13,28 @@ from routomator.station import load_stations, generate_shortnames, generate_subb
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
-    polygonize = ['gdal_polygonize.py', args.catchment, '-f', 'ESRI Shapefile', ws_shape]
-    #call(polygonize)
-
-    os.chdir(args.tempdir) #for some reason, ogr does not write to full path csv files, so change to dir and write relatively
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
-    clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', 'hydat.csv', args.stations]
+    assert not os.path.exists(hydat_ws), 'File {} already exists, remove it before continuing'.format(hydat_ws)
+    clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations]
     call(clip)
 
     # Load as direction raster
-    r = DirectionRaster(direction)
-    r.save_arcgis(os.path.join(args.outdir, args.watershed, 'flow_arcgis.asc'))
+    r = DirectionRaster(args.direction)
+    r.save_arcgis(os.path.join(args.outdir, 'flow_arcgis.asc'))
     print 'Loading Stations'
     stns = load_stations(hydat_ws)
     stns = generate_shortnames(stns)
 
     print 'Generating Subbasin Masks'
-    generate_subbasin_masks(stns, r, os.path.join(args.outdir, args.watershed))
+    generate_subbasin_masks(stns, r, args.outdir)
     print 'Done generating masks'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Routomator master script')
 
     parser.add_argument('-d', '--direction',
-                        default = r'/datasets/projects-hydrology/routomator/data/tempfiles/.asc',
+                        default = r'/datasets/projects-hydrology/routomator/data/output/direction.asc',
                         help = 'Precomputed catchment raster')
-    parser.add_argument('-c', '--catchment',
-                        default = r'/datasets/projects-hydrology/routomator/data/tempfiles/test_ws.asc',
-                        help = 'Precomputed catchment raster')
-    parser.add_argument('-w', '--watershed',
-                        default = None, required=True,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
     parser.add_argument('-s', '--stations',
                         default = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp',
                         help = 'Hydat stations shapefile')

@@ -7,8 +7,6 @@ from routomator.raster import AsciiRaster, DirectionRaster
 def main(args):
     sys.setrecursionlimit(10000)
 
-    if args.watershed is None: assert 'Watershed argument missing'
-
     d = DirectionRaster(args.direction)
     l = tuple(float(x) for x in args.location.split(','))
     print 'Generating catchment for location lat:{} lon:{}'.format(l[0], l[1])
@@ -27,10 +25,7 @@ if __name__ == '__main__':
                         help = 'Input direction ascii raster')
     parser.add_argument('-l', '--location',
                         default = '49.2270,-121.8400',
-                        help = 'Location to create input watershed from of format (-)dd.dddd,(-)dd.dddd (Long,Lat)')
-    parser.add_argument('-w', '--watershed',
-                        default = None, required=True,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
+                        help = 'Location to create input watershed from of format (-)dd.dddd,(-)dd.dddd (Lat,Long)')
     parser.add_argument('-t', '--tempdir',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
                         help = 'Directory to store intermediate files, must have write permissions')

@@ -26,14 +26,9 @@ if __name__ == '__main__':
 
     parser.add_argument('-a', '--accumulation',
                         default = r'/datasets/projects-hydrology/routomator/data/input/flow-acc-15.asc',
-                        help = 'Input direction ascii raster')
-    parser.add_argument('-c', '--catchment',
-                        default = r'/datasets/projects-hydrology/routomator/data/tempfiles/test_ws.asc',
+                        help = 'Input accumulation ascii raster')
+    parser.add_argument('-c', '--catchment', required=True
                         help = 'Precomputed catchment raster')
-    parser.add_argument('-w', '--watershed',
-                        default = None, required=True,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
-
     parser.add_argument('-t', '--tempdir',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
                         help = 'Directory to store intermediate files, must have write permissions')
