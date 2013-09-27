@@ -1,25 +1,33 @@
 import os
 import argparse
-import sys
+
 from subprocess import call
 
-from rpy2.robjects import r
-from rpy2.robjects.packages import importr
-
-from routomator.raster import AsciiRaster, DirectionRaster
-from routomator.direction import correct_edge_flows
+from routomator.raster import DirectionRaster
 from routomator.station import load_stations, generate_shortnames, generate_subbasin_masks
 
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
-    assert not os.path.exists(hydat_ws), 'File {} already exists, remove it before continuing'.format(hydat_ws)
+
+    if os.path.exists(hydat_ws):
+        if args.overwrite:
+            try:
+                os.remove(hydat_ws)
+            except:
+                raise Exception('Unable to remove hydat file {}, please look into this'.format(hydat_ws))
+        else:
+            raise Exception('File {} already exists, remove it  or use --overwrite before continuing'.format(hydat_ws))
+
+    print 'Clipping stations to catchment area'
     clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations]
     call(clip)
 
     # Load as direction raster
+    print 'Loading direction raster'
     r = DirectionRaster(args.direction)
+    print 'Saving with ArcGIS direction keys for possible investigation'
     r.save_arcgis(os.path.join(args.outdir, 'flow_arcgis.asc'))
     print 'Loading Stations'
     stns = load_stations(hydat_ws)
@@ -46,5 +54,9 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--outdir',
                         default = r'/datasets/projects-hydrology/routomator/data/output',
                         help = 'Directory to store output files, must have write permissions')
+    parser.add_argument('--overwrite', action='store_true',
+                        default = False,
+                        help = 'If the hydat.csv file already exists in the tempdir, overwrite it')
+
     args = parser.parse_args()
     main(args)
