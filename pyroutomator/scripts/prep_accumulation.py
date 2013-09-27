@@ -11,16 +11,37 @@ from routomator.direction import correct_edge_flows
 from routomator.station import load_stations, generate_shortnames, generate_subbasin_masks
 
 def main(args):
+
+    print 'Extracting catchment polygon'
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
-    polygonize = ['gdal_polygonize.py', args.catchment, '-f', 'ESRI Shapefile', ws_shape]
+    polygonize = [
+        'gdal_polygonize.py',
+        args.catchment,
+        '-f', 'ESRI Shapefile',
+        ws_shape
+        ]
     call(polygonize)
 
-    acc_cut = ['gdalwarp', '-overwrite', '-cutline', ws_shape, args.accumulation, os.path.join(args.tempdir, 'accumulation_clipped.tif')]
+    print 'Clipping accumulation raster to catchment'
+    acc_cut = [
+        'gdalwarp',
+        '-overwrite',
+        '-dstnodata', '-9999',
+        '-cutline', ws_shape,
+        args.accumulation,
+        os.path.join(args.tempdir, 'accumulation_clipped.tif')
+        ]
     call(acc_cut)
 
-    acc_trans = ['gdal_translate', '-of', 'AAIGrid', os.path.join(args.tempdir, 'accumulation_clipped.tif'), os.path.join(args.tempdir, 'accumulation_clipped.asc')]
+    print 'Saving as Arc Ascii'
+    acc_trans = [
+        'gdal_translate',
+        '-of', 'AAIGrid', os.path.join(args.tempdir, 'accumulation_clipped.tif'),
+        os.path.join(args.tempdir, 'accumulation_clipped.asc')
+        ]
     call(acc_trans)
-
+    print 'Done
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Accumulation file prep for flowgen')
 
