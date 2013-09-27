@@ -25,6 +25,6 @@ setup(
                'scripts/generate_vel_diff_file.py',
                'scripts/generate_ws_catch.py',
                'scripts/prep_accumulation.py'],
-    requires=['rpy2'],
-    long_description=read('README')
+    install_requires=['rpy2'],
+    long_description=read('README.txt')
     )
