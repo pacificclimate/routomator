@@ -18,7 +18,7 @@ def main(args):
     print 'Catchement area creation complete'
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Routomator master script')
+    parser = argparse.ArgumentParser(description='Watershed catchment area generator')
 
     parser.add_argument('-d', '--direction',
                         default = r'/datasets/projects-hydrology/routomator/data/input/flow-dir-15.asc',

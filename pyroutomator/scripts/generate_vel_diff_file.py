@@ -48,7 +48,7 @@ def main(args):
     print '\tDone saving diffusion file'
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Routomator master script')
+    parser = argparse.ArgumentParser(description='Velocity and diffusion raster generator')
 
     parser.add_argument('-f', '--fraction',
                         default = r'/datasets/projects-hydrology/routomator/data/output/fraction.asc',

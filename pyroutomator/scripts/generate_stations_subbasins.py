@@ -30,10 +30,12 @@ def main(args):
     print 'Done generating masks'
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Routomator master script')
+    parser = argparse.ArgumentParser(description='Subbasin and station file generator')
 
     parser.add_argument('-d', '--direction',
                         default = r'/datasets/projects-hydrology/routomator/data/output/direction.asc',
+                        help = 'Input direction ascii raster')
+    parser.add_argument('-c', '--catchment', required=True,
                         help = 'Precomputed catchment raster')
     parser.add_argument('-s', '--stations',
                         default = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp',

@@ -28,13 +28,11 @@ def main(args):
     raster.writeRaster(fraction, filename=os.path.join(args.outdir, 'fraction.asc'), format='ascii', overwrite=True, NAflag=0)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Routomator master script')
+    parser = argparse.ArgumentParser(description='Watershed fraction file generator')
+
     parser.add_argument('-c', '--catchment',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles/test_ws.asc',
                         help = 'Precomputed catchment raster')
-    parser.add_argument('-w', '--watershed',
-                        default = None, required=True,
-                        help = 'Watershed being processed.  Necessary to determine output folder')
     parser.add_argument('-o', '--outdir',
                         default = r'/datasets/projects-hydrology/routomator/data/output',
                         help = 'Directory to store output files, must have write permissions')

@@ -22,12 +22,12 @@ def main(args):
     call(acc_trans)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Routomator master script')
+    parser = argparse.ArgumentParser(description='Accumulation file prep for flowgen')
 
     parser.add_argument('-a', '--accumulation',
                         default = r'/datasets/projects-hydrology/routomator/data/input/flow-acc-15.asc',
                         help = 'Input accumulation ascii raster')
-    parser.add_argument('-c', '--catchment', required=True
+    parser.add_argument('-c', '--catchment', required=True,
                         help = 'Precomputed catchment raster')
     parser.add_argument('-t', '--tempdir',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
