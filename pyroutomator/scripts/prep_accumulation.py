@@ -40,7 +40,7 @@ def main(args):
         os.path.join(args.tempdir, 'accumulation_clipped.asc')
         ]
     call(acc_trans)
-    print 'Done
+    print 'Done'
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Accumulation file prep for flowgen')
