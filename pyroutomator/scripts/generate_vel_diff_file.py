@@ -30,20 +30,21 @@ def main(args):
 
     print '\tTransforming lakes layer into raster coordinates'
     r.assign('lakes_raster', lakes_raster)
-    r('lakes_raster[which(fraction[]==0)] <- 0')
+    r('lakes_raster[which(is.na(fraction[]))] <- 0')
     r.assign('threshold', threshold)
     r('velocity[which(lakes_raster[]>threshold)] <- 0.3')
+    velocity = r('velocity')
 
     print '\tSaving Velocity Layer'
     raster.writeRaster(velocity, filename=os.path.join(args.outdir, 'velocity.asc'), format='ascii', overwrite=True, NAflag=0)
 
     # Create Diffusion Raster #######
     print '\tCreating Diffusion File'
-    diffusion = velocity
-    r.assign('diffusion', diffusion)
+    r('diffusion <- velocity')
     r('diffusion[which(diffusion[]==2)] <- 2000')
     r('diffusion[which(diffusion[]==0.3)] <- 1300')
     print '\tSaving Diffusion File'
+    diffusion = r('diffusion')
     raster.writeRaster(diffusion, filename=os.path.join(args.outdir, 'diffusion.asc'), format='ascii', overwrite=True, NAflag=0)
     print '\tDone saving diffusion file'
 
