@@ -1,0 +1,44 @@
+# Command line
+gdal_rasterize -a STREAM_MAG -te -169 40 -101 72 -ts 16320 7980 /home/data/gis/basedata/BC_Water/BC_CWB/CWB_STRM_N/bc_cwb_streams_order_6_and_greater_WGS84_magnitude.shp /home/data/projects/hydrology/routomator/data/dem_prep_deleteme/streams.tif
+
+    
+# GRASS
+r.in.gdal -o --overwrite input=/home/data/projects/hydrology/routomator/data/dem_prep_deleteme/streams.tif output=streams
+r.mapcalc --overwrite expression='"stream-calc"=100+2*exp(("streams"/100000))'
+    
+r.in.gdal -o --overwrite input=/home/data/projects/hydrology/vic/data/dem/gmted_15as_mk.tif output=dem
+
+g.region rast=dem
+r.hydrodem --overwrite input=dem output=dem-hydrodem
+r.mapcalc --overwrite expression='"dem-burned"="dem-hydrodem"-"stream-calc"'
+r.hydrodem --overwrite input=dem-burned output=dem-hydrodem-burned
+    
+# r.watershed -s -b --overwrite elevation=dem-hydrodem-burned accumulation=flow-acc-15 drainage=flow-dir-15 stream=stream-15 threshold=1200000
+r.watershed -s -b --overwrite elevation=dem-hydrodem accumulation=flow-acc-15 drainage=flow-dir-15
+r.mapcalc --overwrite expression='"flow-acc-15-abs"=abs("flow-acc-15")'
+
+# Must then corrent the r.watershed directions to vic directions (also used by r.filldir module)
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15"==1, 10, "flow-dir-15")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==2, 1, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==10, 2, "flow-dir-15-correct")'
+
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==4, 10, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==7, 4, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==10, 7, "flow-dir-15-correct")'
+
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==5, 10, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==6, 5, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==10, 6, "flow-dir-15-correct")'
+
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==3, 10, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==8, 3, "flow-dir-15-correct")'
+r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==10, 8, "flow-dir-15-correct")'
+
+r.out.arc --overwrite input=dem-hydrodem-burned output=/home/data/projects/hydrology/routomator/data/input/dem-hydrodem-burned.asc
+r.out.arc --overwrite input=flow-acc-15-abs output=/home/data/projects/hydrology/routomator/data/input/flow-acc-15.asc
+r.out.arc --overwrite input=flow-dir-15-correct output=/home/data/projects/hydrology/routomator/data/input/flow-dir-15.asc
+
+# r.thin --overwrite input=stream-15 output=stream-15-thin
+# r.to.vect --overwrite input=stream-15-thin output=stream
+# v.clean input=stream output=stream-clean
+# v.out.ogr --overwrite input=stream-clean dsn=/datasets/projects-hydrology/routomator/data/input/streams.shp
