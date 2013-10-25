@@ -4,7 +4,7 @@ import argparse
 from subprocess import call
 
 from routomator.raster import DirectionRaster
-from routomator.station import load_stations, generate_shortnames, generate_subbasin_masks
+from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_subbasin_masks
 
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
@@ -30,8 +30,12 @@ def main(args):
     print 'Saving with ArcGIS direction keys for possible investigation'
     r.save_arcgis(os.path.join(args.outdir, 'flow_arcgis.asc'))
     print 'Loading Stations'
-    stns = load_stations(hydat_ws)
-    stns = generate_shortnames(stns)
+
+    if args.shortnames:
+        stns = load_stations_w_shortnames(hydat_ws)
+    else:
+        stns = load_stations(hydat_ws)
+        stns = generate_shortnames(stns)
 
     print 'Generating Subbasin Masks'
     generate_subbasin_masks(stns, r, args.outdir)
@@ -57,6 +61,9 @@ if __name__ == '__main__':
     parser.add_argument('--overwrite', action='store_true',
                         default = False,
                         help = 'If the hydat.csv file already exists in the tempdir, overwrite it')
+    parser.add_argument('--shortnames', action='store_true',
+                        default = False,
+                        help = 'If the hydat.csv file already has a SHORTNAME field to use for station shortnames')
 
     args = parser.parse_args()
     main(args)

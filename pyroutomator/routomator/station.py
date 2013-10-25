@@ -57,6 +57,20 @@ def load_stations(station_csv):
             stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG'])))
     return stations
 
+def load_stations_w_shortnames(station_csv):
+    '''
+    Loads the station list from an open file like object
+    '''
+    import csv
+    with open(station_csv, 'r') as f:
+        s = csv.DictReader(f)
+    
+        stations = []
+        for row in s:
+            stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG']), row['SHORTNAME']))
+    return stations
+
+
 def directly_downstream_station(station_list, (xi, yi), dir_raster):
     station_coords = [station.raster_coords(dir_raster) for station in station_list]
     next_cell = dir_raster.next_downstream_cell((xi, yi))
