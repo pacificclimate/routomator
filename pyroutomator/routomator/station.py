@@ -28,6 +28,13 @@ class Station(object):
         return (isinstance(other, self.__class__)
                 and self.__dict__ == other.__dict__)
 
+    def catchment(self, r):
+        '''
+        Based on an input DirectionRaster, counts the number of cells flowing into the station's cell
+        '''
+
+        return len(r.all_upstream_cells(self.raster_coords(r)))
+
     def raster_coords(self, r):
         '''
         Converts station lat/lon to raster xi/yi (anchor upper left) based on the
@@ -36,6 +43,7 @@ class Station(object):
 
         return r.raster_coords((self.lat, self.lon))
         
+
     def vic_coords(self, r):
         '''
         Converts station lat/lon to vic raster xi/yi (anchor lower left) based on the
@@ -114,12 +122,15 @@ def generate_subbasin_masks(station_list, dir_raster, outdir):
         temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_interior.asc'))
         del(temp_raster)
 
-def station_file(self):
-    stnlist = sorted(self.stations, key=lambda k:k['count'])
-    for stn in stnlist:
-        xi, yi = self.cell_index(stn['LAT'], stn['LONG'])
-        yi = self.y_coord_to_vic(yi)
-        print '1\t0\t{stn}\t{xi}\t{yi}\t-999\t0\nNONE'.format(stn=station_id(stn['STATION']), xi=xi, yi=yi)
+def generate_station_file(station_list, dir_raster):
+    for stn in station_list:
+        stn.count = stn.catchment(dir_raster)
+    station_list = sorted(station_list, key=lambda k:k.count, reverse=True)
+    s = ''
+    for stn in station_list:
+        (xi, yi) = stn.vic_coords(dir_raster)
+        s += '1\t0\t{stn}\t{xi}\t{yi}\t-999\t0\nNONE\n'.format(stn=stn.short_name, xi=xi, yi=yi)
+    return s
 
 def find_station_by_coords(station_list, (xi, yi)):
     raise NotImplemented

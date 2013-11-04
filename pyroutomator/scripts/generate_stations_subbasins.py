@@ -4,7 +4,7 @@ import argparse
 from subprocess import call
 
 from routomator.raster import DirectionRaster
-from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_subbasin_masks
+from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_subbasin_masks, generate_station_file
 
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
@@ -41,6 +41,13 @@ def main(args):
     generate_subbasin_masks(stns, r, args.outdir)
     print 'Done generating masks'
 
+    print 'Generating Station File'
+    s = generate_station_file(stns, r)
+    stn_fp = os.path.join(args.outdir, 'station_file.txt')
+    with open(stn_fp, 'wb') as f:
+        f.write(s)
+    print 'Done generating station file'
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Subbasin and station file generator')
 
