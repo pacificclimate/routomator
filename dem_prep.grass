@@ -18,7 +18,7 @@ r.hydrodem --overwrite input=dem output=dem-hydrodem
 r.mapcalc --overwrite expression='"dem-burned"=if(isnull("stream-calc"), "dem-hydrodem", "dem-hydrodem"-"stream-calc")'
 r.hydrodem --overwrite input=dem-burned output=dem-hydrodem-burned
     
-r.watershed -s -b --overwrite elevation=dem-hydrodem accumulation=flow-acc-15 drainage=flow-dir-15
+r.watershed -s -b --overwrite elevation=dem-hydrodem-burned accumulation=flow-acc-15 drainage=flow-dir-15
 #### r.watershed uses negative values to indicate outward flow, convert to absolute
 r.mapcalc --overwrite expression='"flow-acc-15-abs"=abs("flow-acc-15")'
 
@@ -40,15 +40,14 @@ r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"
 r.mapcalc --overwrite expression='"flow-dir-15-correct"=if("flow-dir-15-correct"==10, 8, "flow-dir-15-correct")'
 #### Done converting directions
 
-r.out.arc --overwrite input=dem-hydrodem output=/home/data/projects/hydrology/routomator/data/input/dem-hydrodem-noburn.asc
-r.out.arc --overwrite input=flow-acc-15-abs output=/home/data/projects/hydrology/routomator/data/input/flow-acc-15-noburn.asc
-r.out.arc --overwrite input=flow-dir-15-correct output=/home/data/projects/hydrology/routomator/data/input/flow-dir-15-noburn.asc
+r.out.arc --overwrite input=dem-hydrodem-burned output=/home/data/projects/hydrology/routomator/data/input/dem-hydrodem-burned-FN.asc
+r.out.arc --overwrite input=flow-acc-15-abs output=/home/data/projects/hydrology/routomator/data/input/flow-acc-15-burned-FN.asc
+r.out.arc --overwrite input=flow-dir-15-correct output=/home/data/projects/hydrology/routomator/data/input/flow-dir-15-burned-FN.asc
 
-d.mon start=wx0
-d.rast map=dem-hydrodem
-d.rast map=dem-hydrodem-burned
-d.rast map=stream-calc
-    
+# d.mon start=wx0
+# d.rast map=dem-hydrodem
+# d.rast map=dem-hydrodem-burned
+# d.rast map=stream-calc
 
 # r.thin --overwrite input=stream-15 output=stream-15-thin
 # r.to.vect --overwrite input=stream-15-thin output=stream
