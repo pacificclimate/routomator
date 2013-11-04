@@ -46,7 +46,7 @@ def main(args):
     call(convertshp)
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='XMask file generator')
+    parser = argparse.ArgumentParser(description='Ascii direction to point converter')
     parser.add_argument('-d', '--direction', required=True,
                         help = 'Input direction ascii raster') 
     parser.add_argument('-t', '--tempdir',
