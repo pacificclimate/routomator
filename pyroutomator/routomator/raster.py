@@ -180,6 +180,8 @@ class DirectionRaster(AsciiRaster):
         direction = self._cell_direction((xi, yi))
         if direction == str(self.nodata) or direction == '9':
             return None
+        if direction < 0:
+            direction = abs(direction)
         return(tuple(map(operator.add, (xi, yi), self.cell_diff[direction])))
 
     def all_downstream_cells(self, (xi, yi)):
