@@ -2,6 +2,8 @@ import os
 import argparse
 import sys
 
+from subprocess import call
+
 from routomator.raster import AsciiRaster, DirectionRaster
 
 def main(args):
@@ -21,13 +23,14 @@ def main(args):
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     polygonize = [
         'gdal_polygonize.py',
-        args.catchment,
+        catch_file,
         '-f', 'ESRI Shapefile',
         ws_shape
         ]
     call(polygonize)
     print 'DONE'
 
+    hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
     print 'Clipping hydat stations to catchment area'
     if os.path.exists(hydat_ws):
         if args.overwrite:
@@ -54,8 +57,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--tempdir',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
                         help = 'Directory to store intermediate files, must have write permissions')
-    parser.add_argument('-s', '--stations',
-                        default = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp',
+    parser.add_argument('-s', '--stations', required=True,
                         help = 'Hydat stations shapefile')
     parser.add_argument('--overwrite', action='store_true',
                         default = False,
