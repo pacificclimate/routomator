@@ -12,15 +12,7 @@ from routomator.station import load_stations, generate_shortnames, generate_subb
 
 def main(args):
 
-    print 'Extracting catchment polygon'
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
-    polygonize = [
-        'gdal_polygonize.py',
-        args.catchment,
-        '-f', 'ESRI Shapefile',
-        ws_shape
-        ]
-    call(polygonize)
 
     print 'Clipping accumulation raster to catchment'
     acc_cut = [

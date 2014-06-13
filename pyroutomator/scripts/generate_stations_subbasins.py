@@ -11,19 +11,6 @@ def main(args):
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
 
-    if os.path.exists(hydat_ws):
-        if args.overwrite:
-            try:
-                os.remove(hydat_ws)
-            except:
-                raise Exception('Unable to remove hydat file {}, please look into this'.format(hydat_ws))
-        else:
-            raise Exception('File {} already exists, remove it  or use --overwrite before continuing'.format(hydat_ws))
-
-    print 'Clipping stations to catchment area'
-    clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations]
-    call(clip)
-
     # Load as direction raster
     print 'Loading direction raster'
     r = DirectionRaster(args.direction)
