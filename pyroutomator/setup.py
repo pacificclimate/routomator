@@ -18,6 +18,7 @@ setup(
     packages=find_packages('routomator'),
     scripts = ['scripts/generate_fraction_file.py',
                'scripts/generate_stations_subbasins.py',
+               'scripts/generate_station_catchments.py',
                'scripts/generate_vel_diff_file.py',
                'scripts/generate_ws_catch.py',
                'scripts/prep_accumulation.py',
