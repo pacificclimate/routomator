@@ -45,18 +45,12 @@ if __name__ == '__main__':
                         help = 'Input direction ascii raster')
     parser.add_argument('-c', '--catchment', required=True,
                         help = 'Precomputed catchment raster')
-    parser.add_argument('-s', '--stations',
-                        default = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp',
-                        help = 'Hydat stations shapefile')
     parser.add_argument('-t', '--tempdir',
                         default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
                         help = 'Directory to store intermediate files, must have write permissions')
     parser.add_argument('-o', '--outdir',
                         default = r'/datasets/projects-hydrology/routomator/data/output',
                         help = 'Directory to store output files, must have write permissions')
-    parser.add_argument('--overwrite', action='store_true',
-                        default = False,
-                        help = 'If the hydat.csv file already exists in the tempdir, overwrite it')
     parser.add_argument('--shortnames', action='store_true',
                         default = False,
                         help = 'If the hydat.csv file already has a SHORTNAME field to use for station shortnames')
