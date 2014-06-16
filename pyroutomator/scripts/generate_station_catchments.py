@@ -7,6 +7,8 @@ from routomator.raster import DirectionRaster
 from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_subbasin_masks, generate_station_file
 
 def main(args):
+    sys.setrecursionlimit(10000)
+
     # Need to clip the stations by the watershed area, most efficient in gdal
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
