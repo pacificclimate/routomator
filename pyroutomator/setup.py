@@ -15,7 +15,7 @@ setup(
     description = ("VIC routing automation package"),
     keywords = "pcic hydrology dem raster routing",
     url="http://www.pacificclimate.org/",
-    packages=find_packages('routomator'),
+    packages=find_packages('.'),
     scripts = ['scripts/generate_fraction_file.py',
                'scripts/generate_stations_subbasins.py',
                'scripts/generate_station_catchments.py',
