@@ -268,15 +268,3 @@ class DirectionRaster(AsciiRaster):
     def y_coord_to_vic(self, yi):
         return self.nrows - (yi+1)
         pass
-         
-    def print_subbasin(self, station):
-        print 'Subbasin mask for {}'.format(station)
-        a = self.catchment((3,6))
-        b = self.catchment((3,3))
-        a.print_raster()
-        print '#################'
-        b.print_raster()
-        a.union(b)
-        print '#################'
-        a.print_raster()
-        a.save_ascii('/tmp/' + station + '.ascii')
