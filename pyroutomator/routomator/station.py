@@ -5,7 +5,7 @@ class Station(object):
         if type(lat) != float or type(lon) != float:
             raise TypeError, 'Station lat/lon must be of type float'
         self.long_name = long_name
-        self.std_id = stn_id
+        self.stn_id = stn_id
         if short_name:
             self.short_name = short_name
         else:
