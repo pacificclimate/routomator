@@ -29,7 +29,7 @@ def main(args):
     for station in stns:
         print station.long_name
         temp_raster = r.catchment_mask(station.raster_coords(r))
-        temp_raster.save(os.path.join(args.outdir, station.short_name + '_catchment.asc'))
+        temp_raster.save(os.path.join(args.outdir, station.id + '_catchment.asc'))
         del(temp_raster)
     print 'Done generating station catchments'
 

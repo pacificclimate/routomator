@@ -1,10 +1,11 @@
 import os
 
 class Station(object):
-    def __init__(self, long_name, lat, lon, short_name=None):
+    def __init__(self, long_name, lat, lon, short_name=None, stn_id=None):
         if type(lat) != float or type(lon) != float:
             raise TypeError, 'Station lat/lon must be of type float'
         self.long_name = long_name
+        self.std_id = stn_id
         if short_name:
             self.short_name = short_name
         else:
@@ -62,7 +63,8 @@ def load_stations(station_csv):
     
         stations = []
         for row in s:
-            stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG'])))
+                stn_id = row.get('ID', None)
+            stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG']), stn_id=stn_id))
     return stations
 
 def load_stations_w_shortnames(station_csv):
