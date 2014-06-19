@@ -63,7 +63,7 @@ def load_stations(station_csv):
     
         stations = []
         for row in s:
-                stn_id = row.get('ID', None)
+            stn_id = row.get('ID', None)
             stations.append(Station(row['STATION'], float(row['LAT']), float(row['LONG']), stn_id=stn_id))
     return stations
 
