@@ -25,12 +25,21 @@ def main(args):
         stns = load_stations(hydat_ws)
         stns = generate_shortnames(stns)
 
-    print 'Generating Station Catchments'
+    print 'Generating Station Catchment geotiff and shapefiles'
     for station in stns:
         print station.long_name
         temp_raster = r.catchment_mask(station.raster_coords(r))
-        temp_raster.save(os.path.join(args.outdir, station.id + '_catchment.asc'))
+        gtif_fn = os.path.join(args.outdir, 'catchment_' + station.stn_id + '.tif')
+        temp_raster.save_geotiff(gtif_fn)
         del(temp_raster)
+        shp_fn = os.path.join(args.outdir, 'catchment_' + station.stn_id + '.shp')
+        polygonize = [
+            'gdal_polygonize.py',
+            gtif_fn,
+            '-f', 'ESRI Shapefile',
+            shp_fn
+            ]
+        call(polygonize)
     print 'Done generating station catchments'
 
     print 'Generating Station File'
