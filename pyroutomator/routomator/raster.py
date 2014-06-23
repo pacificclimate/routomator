@@ -52,7 +52,7 @@ NODATA_value {5}
     def save_geotiff(self, outfile):
         import numpy as np
         
-        array = np.array(self.raster)
+        array = np.array(self.raster, dtype=np.int16)
         array2geotiff(outfile, self.xll, self.yll, self.cellsize, array)
 
     def print_raster(self):
