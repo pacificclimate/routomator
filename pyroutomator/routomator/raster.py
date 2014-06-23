@@ -49,6 +49,12 @@ NODATA_value {5}
                 f.write('\n')
         print 'Done saving raster'
 
+    def save_geotiff(self, outfile):
+        import numpy as np
+        
+        array = np.array(self.raster)
+        array2geotiff(outfile, self.xll, self.yll, self.cellsize, array)
+
     def print_raster(self):
         for row in self.raster:
             print row
@@ -268,3 +274,27 @@ class DirectionRaster(AsciiRaster):
     def y_coord_to_vic(self, yi):
         return self.nrows - (yi+1)
         pass
+
+def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array):
+    try:
+        from osgeo import gdal, ogr, osr
+    except ImportError:
+        import gdal, ogr, osr
+
+    cols = raster_data_array.shape[1]
+    rows = raster_data_array.shape[0]
+
+    driver = gdal.GetDriverByName('GTiff')
+    dst = driver.Create(outfile_name, cols, rows, 1, gdal.GDT_Int16)
+    dst.SetGeoTransform((x_origin, cell_size, 0, y_origin, 0, cell_size))
+    outband = dst.GetRasterBand(1)
+    outband.WriteArray(raster_data_array)
+    outband.SetNoDataValue(-9999)
+    outband.GetStatistics(0,1)
+    print raster_data_array[:3]
+    dstSRS = osr.SpatialReference()
+    dstSRS.ImportFromEPSG(4326)
+    dst.SetProjection(dstSRS.ExportToWkt())
+    dst.BuildOverviews('NEAREST', [2,4,8,16])
+    outband.FlushCache()
+    dst = None
