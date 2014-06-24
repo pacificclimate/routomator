@@ -52,8 +52,11 @@ NODATA_value {5}
     def save_geotiff(self, outfile):
         import numpy as np
         
+        # Ascii is lower left oriented, but gdal/geotiff is upper left oriented
+        y_upper_left = self.yll + (self.nrows * self.cellsize)
+
         array = np.array(self.raster, dtype=np.int16)
-        array2geotiff(outfile, self.xll, self.yll, self.cellsize, array)
+        array2geotiff(outfile, self.xll, y_upper_left, self.cellsize, array)
 
     def print_raster(self):
         for row in self.raster:
@@ -286,7 +289,7 @@ def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array
 
     driver = gdal.GetDriverByName('GTiff')
     dst = driver.Create(outfile_name, cols, rows, 1, gdal.GDT_Int16)
-    dst.SetGeoTransform((x_origin, cell_size, 0, y_origin, 0, cell_size))
+    dst.SetGeoTransform((x_origin, cell_size, 0, y_origin, 0, -cell_size))
     outband = dst.GetRasterBand(1)
     outband.WriteArray(raster_data_array)
     outband.SetNoDataValue(-9999)
