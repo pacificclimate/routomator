@@ -24,6 +24,6 @@ setup(
                'scripts/prep_accumulation.py',
                'scripts/direction_raster_to_point.py',
                'scripts/generate_xmask.py'],
-    install_requires=['rpy2'],
+    install_requires=['rpy2', 'pyshp'],
     long_description=read('README.txt')
     )

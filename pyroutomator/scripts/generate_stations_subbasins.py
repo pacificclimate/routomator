@@ -3,6 +3,8 @@ import argparse
 
 from subprocess import call
 
+import shapefile
+
 from routomator.raster import DirectionRaster
 from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict
 
@@ -51,6 +53,7 @@ def main(args):
 
     print 'Generating Diagnostic Output'
     i = 0
+    # w = shapefile.Writer()
     for station in stns:
         print '[{}/{}]: {}'.format(i, total, station.long_name)
         
@@ -69,6 +72,18 @@ def main(args):
             shp_fn
             ]
         call(polygonize)
+
+    #     # Merge with existing shapefiles
+    #     shp_reader = shapefile.Reader(shp_fn)
+    #     if len(sf.shapes) > 1:
+    #         # Do something...
+    #     w._shapes.extend(shp_reader.shapes())
+    #     w.records.extend(shp_reader.records())
+    #     i += 1
+
+    # # Shapefile busywork
+    # w.fields = list(shp_reader.fields)
+    # w.save(os.path.join(args.outdir, 'subbasins_merged'))
 
     print 'Done creating diagnostic output'
 
