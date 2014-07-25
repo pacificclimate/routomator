@@ -72,14 +72,13 @@ def main(args):
             shp_fn
             ]
         call(polygonize)
-
+        i += 1
     #     # Merge with existing shapefiles
     #     shp_reader = shapefile.Reader(shp_fn)
     #     if len(sf.shapes) > 1:
     #         # Do something...
     #     w._shapes.extend(shp_reader.shapes())
     #     w.records.extend(shp_reader.records())
-    #     i += 1
 
     # # Shapefile busywork
     # w.fields = list(shp_reader.fields)
