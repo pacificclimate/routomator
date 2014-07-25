@@ -59,7 +59,7 @@ NODATA_value {5}
         y_upper_left = self.yll + (self.nrows * self.cellsize)
 
         array = np.array(self.raster, dtype=np.int16)
-        array2geotiff(outfile, self.xll, y_upper_left, self.cellsize, array)
+        array2geotiff(outfile, self.xll, y_upper_left, self.cellsize, array, self.nodata)
 
     def print_raster(self):
         for row in self.raster:
@@ -281,7 +281,7 @@ class DirectionRaster(AsciiRaster):
         return self.nrows - (yi+1)
         pass
 
-def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array):
+def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array, nodata_value):
     try:
         from osgeo import gdal, ogr, osr
     except ImportError:
@@ -295,7 +295,7 @@ def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array
     dst.SetGeoTransform((x_origin, cell_size, 0, y_origin, 0, -cell_size))
     outband = dst.GetRasterBand(1)
     outband.WriteArray(raster_data_array)
-    outband.SetNoDataValue(-9999)
+    outband.SetNoDataValue(nodata_value)
     outband.GetStatistics(0,1)
     dstSRS = osr.SpatialReference()
     dstSRS.ImportFromEPSG(4326)
