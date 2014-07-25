@@ -1,5 +1,8 @@
 import os
 import operator
+import logging
+
+log = logging.getLogger(__name__)
 
 class AsciiRaster(object):
     def __init__(self, filepath):
@@ -41,13 +44,13 @@ NODATA_value {5}
         return h
 
     def save(self, outfile):
-        print 'Saving raster to {}'.format(os.path.basename(outfile))
+        log.debug('Saving raster to {}'.format(os.path.basename(outfile)))
         with open(outfile, 'w+') as f:
             f.write(self.header)
             for row in self.raster:
                 f.write(' '.join(str(x) for x in row))
                 f.write('\n')
-        print 'Done saving raster'
+        log.debug('Done saving raster')
 
     def save_geotiff(self, outfile):
         import numpy as np
@@ -294,7 +297,6 @@ def array2geotiff(outfile_name, x_origin, y_origin, cell_size, raster_data_array
     outband.WriteArray(raster_data_array)
     outband.SetNoDataValue(-9999)
     outband.GetStatistics(0,1)
-    print raster_data_array[:3]
     dstSRS = osr.SpatialReference()
     dstSRS.ImportFromEPSG(4326)
     dst.SetProjection(dstSRS.ExportToWkt())
