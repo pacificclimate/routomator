@@ -4,7 +4,7 @@ import argparse
 from subprocess import call
 
 from routomator.raster import DirectionRaster
-from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_subbasin_masks, generate_station_file
+from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict
 
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
@@ -24,9 +24,53 @@ def main(args):
         stns = load_stations(hydat_ws)
         stns = generate_shortnames(stns)
 
-    print 'Generating Subbasin Masks'
-    generate_subbasin_masks(stns, r, args.outdir)
-    print 'Done generating masks'
+    print 'Generating VIC Subbasin Masks'
+    i = 0
+    total = len(stns)
+    print '{} Stations total'.format(total)
+    upstream_stations = generate_upstream_station_dict(stns, r)
+    
+    headwater_stations = [station for station in stns if station.raster_coords(r) not in upstream_stations.keys()]
+    print '{} Headwater stations'.format(len(headwater_stations))
+    for station in headwater_stations:
+        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        i += 1
+        temp_raster = r.copy_dummy()
+        temp_raster.save(os.path.join(args.outdir, station.short_name + '_subbasin_headwater.asc'))
+        del(temp_raster)
+
+    interior_stations = [station for station in stns if station.raster_coords(r) in upstream_stations.keys()]
+    print '{} Interior stations'.format(len(interior_stations))
+    for station in interior_stations:
+        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        i += 1
+        temp_raster = generate_single_subbasin_mask(upstream_stations[station.raster_coords(r)], r)
+        temp_raster.save(os.path.join(args.outdir, station.short_name + '_subbasin_interior.asc'))
+        del(temp_raster)
+    print 'Done generating VIC Subbasin Masks'
+
+    print 'Generating Diagnostic Output'
+    i = 0
+    for station in stns:
+        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        
+        # Convert to geotiff
+        temp_raster = r.catchment_mask(station.raster_coords(r))
+        gtif_fn = os.path.join(args.outdir, 'catchment_' + station.short_name + '.tif')
+        temp_raster.save_geotiff(gtif_fn)
+        del(temp_raster)
+
+        # Copy to shapefile
+        shp_fn = os.path.join(args.outdir, 'catchment_' + station.short_name + '.shp')
+        polygonize = [
+            'gdal_polygonize.py',
+            gtif_fn,
+            '-f', 'ESRI Shapefile', '-q',
+            shp_fn
+            ]
+        call(polygonize)
+
+    print 'Done creating diagnostic output'
 
     print 'Generating Station File'
     s = generate_station_file(stns, r)
