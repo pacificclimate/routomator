@@ -135,7 +135,6 @@ def generate_station_file(station_list, dir_raster):
     return s
 
 def generate_station_map(station_list, dir_raster):
-    for stn in station_list:
     s = ''
     for stn in station_list:
         (xi, yi) = stn.vic_coords(dir_raster)
