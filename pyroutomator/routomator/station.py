@@ -134,6 +134,14 @@ def generate_station_file(station_list, dir_raster):
         s += '1\t0\t{stn}\t{xi}\t{yi}\t-999\t0\nNONE\n'.format(stn=stn.short_name, xi=xi, yi=yi)
     return s
 
+def generate_station_map(station_list, dir_raster):
+    for stn in station_list:
+    s = ''
+    for stn in station_list:
+        (xi, yi) = stn.vic_coords(dir_raster)
+        s += '{stn},{ln}\n'.format(stn=stn.short_name, ln=stn.long_name)
+    return s
+
 def find_station_by_coords(station_list, (xi, yi)):
     raise NotImplemented
 
