@@ -1,7 +1,7 @@
 import os
 from setuptools import setup, find_packages
 
-__version__ = (0, 1, 1)
+__version__ = (0, 1, 2)
 
 def read(fname):
         return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -17,6 +17,7 @@ setup(
     packages=find_packages('.'),
     scripts = ['scripts/generate_fraction_file.py',
                'scripts/generate_stations_subbasins.py',
+               'scripts/generate_station_map.py',
                'scripts/generate_station_catchments.py',
                'scripts/generate_vel_diff_file.py',
                'scripts/generate_ws_catch.py',
