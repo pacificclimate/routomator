@@ -28,6 +28,9 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--stations',
                         default = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp',
                         help = 'Hydat stations shapefile')
+    parser.add_argument('-t', '--tempdir',
+                        default = r'/datasets/projects-hydrology/routomator/data/tempfiles',
+                        help = 'Directory to store intermediate files, must have write permissions')
     parser.add_argument('-o', '--outdir',
                         default = r'/datasets/projects-hydrology/routomator/data/output',
                         help = 'Directory to store output files, must have write permissions')
