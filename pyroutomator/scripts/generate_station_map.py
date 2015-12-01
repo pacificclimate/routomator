@@ -6,7 +6,7 @@ from subprocess import call
 import shapefile
 
 from routomator.raster import DirectionRaster
-from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict
+from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict, generate_station_map
 
 def main(args):
 
