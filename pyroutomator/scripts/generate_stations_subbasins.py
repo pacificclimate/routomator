@@ -6,7 +6,7 @@ from subprocess import call
 import shapefile
 
 from routomator.raster import DirectionRaster
-from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict
+from routomator.station import load_stations, load_stations_w_shortnames, generate_shortnames, generate_single_subbasin_mask, generate_station_file, generate_upstream_station_dict, generate_station_map
 
 def main(args):
     # Need to clip the stations by the watershed area, most efficient in gdal
@@ -25,6 +25,13 @@ def main(args):
     else:
         stns = load_stations(hydat_ws)
         stns = generate_shortnames(stns)
+
+    # Output the station shortname map
+    s = generate_station_map(stns)
+    stn_fp = os.path.join(args.outdir, 'station_map.txt')
+    with open(stn_fp, 'wb') as f:
+        f.write(s)
+    print 'Done generating station map'
 
     print 'Generating VIC Subbasin Masks'
     i = 0
