@@ -4,9 +4,11 @@ This is the python part of the routomator and provides scripts to generates wate
 
 ## Requirements
 
-1. GDAL library and command line tools: `module load gdal`
 1. R library: `module load R`
+1. GDAL library and command line tools: `module load gdal`
 1. Python version 2. The routomator has not been tested on python 3.
+
+*On current 2016-07-19 compute hardware, you must load R _then_ gdal*
 
 ## Installation
 
