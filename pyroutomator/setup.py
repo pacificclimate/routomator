@@ -3,9 +3,6 @@ from setuptools import setup, find_packages
 
 __version__ = (0, 1, 5)
 
-def read(fname):
-        return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
 setup(
     name = "Routomator",
     version='.'.join(str(d) for d in __version__),
@@ -24,6 +21,5 @@ setup(
                'scripts/prep_accumulation.py',
                'scripts/direction_raster_to_point.py',
                'scripts/generate_xmask.py'],
-    install_requires=['rpy2', 'pyshp'],
-    long_description=read('README.txt')
+    install_requires=['rpy2', 'pyshp']
     )
