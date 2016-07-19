@@ -21,5 +21,5 @@ setup(
                'scripts/prep_accumulation.py',
                'scripts/direction_raster_to_point.py',
                'scripts/generate_xmask.py'],
-    install_requires=['rpy2', 'pyshp']
+    install_requires=['gdal', 'rpy2', 'pyshp']
     )
