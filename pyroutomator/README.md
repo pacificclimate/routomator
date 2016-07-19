@@ -16,7 +16,7 @@ Installing the package
 git clone https://github.com/pacificclimate/routomator
 cd routomator/pyroutomator
 virtualenv -p python2 venv
-source /venv/bin/activate
+source venv/bin/activate
 python setup.py install
 ```
 
