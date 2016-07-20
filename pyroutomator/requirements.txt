@@ -1,0 +1,4 @@
+numpy
+gdal
+rpy2
+pyshp
