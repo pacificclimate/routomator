@@ -21,12 +21,21 @@ def main(args):
 
     print 'Converting catchment area to polygon'
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
+    if os.path.exists(ws_shape):
+        if args.overwrite:
+            try:
+                os.remove(ws_shape)
+            except:
+                raise Exception('Unable to remove hydat file {}, please look into this'.format(ws_shape))
+        else:
+            raise Exception('File {} already exists, remove it  or use --overwrite before continuing'.format(ws_shape))
     polygonize = [
         'gdal_polygonize.py',
         catch_file,
         '-f', 'ESRI Shapefile',
         ws_shape
         ]
+    print 'Calling: {}'.format(' '.join(polygonize))
     call(polygonize)
     print 'DONE'
 
@@ -41,7 +50,8 @@ def main(args):
         else:
             raise Exception('File {} already exists, remove it  or use --overwrite before continuing'.format(hydat_ws))
 
-    clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations]
+    clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations, '-lco', 'GEOMETRY=AS_XY']
+    print 'Calling: {}'.format(' '.join(clip))
     call(clip)
     print 'DONE'
 
