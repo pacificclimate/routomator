@@ -29,8 +29,8 @@ echo "Creating flow diretions"
 echo "Done"
 
 #put new header back on top
-RR=`echo $ROWS '/' '15.0' | bc -l`
-CC=`echo $COLS '/' '15.0' | bc -l`
+RR=`awk "BEGIN {print $ROWS/15.0}"`
+CC=`awk "BEGIN {print $COLS/15.0}"`
 gawk '{if(NR==1) $2='"$CC"'; if(NR==2) $2='"$RR"'; if(NR==5) $2=0.0625; if(NR==6) $2=0; print $0; }' temp_head.junk > temp_newh.junk
 
 cat temp_newh.junk temp_fd.junk > $OUT
