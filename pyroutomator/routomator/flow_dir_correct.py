@@ -1,7 +1,7 @@
 import os
 import argparse
 
-from raster import AsciiRaster
+from .raster import AsciiRaster
 from routomator.direction import correct_edge_flows
 
 

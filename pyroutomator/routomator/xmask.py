@@ -2,7 +2,7 @@ import math
 import argparse
 import os
 
-from raster import AsciiRaster
+from .raster import AsciiRaster
 
 EARTH_CIRCUMFERENCE = 6378137 # earth circumference in meters
 
