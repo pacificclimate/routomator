@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 class AsciiRaster(object):
     def __init__(self, filepath):
-        print 'Loading raster {}'.format(os.path.basename(filepath))
+        print('Loading raster {}'.format(os.path.basename(filepath)))
         with open(filepath, 'rU') as f:
             self.ncols = int(f.readline().strip().split()[1])
             self.nrows = int(f.readline().strip().split()[1])
@@ -63,7 +63,7 @@ NODATA_value {5}
 
     def print_raster(self):
         for row in self.raster:
-            print row
+            print(row)
 
     def union(self, other):
         for i in range(self.nrows):
@@ -172,7 +172,7 @@ class DirectionRaster(AsciiRaster):
         return self.raster[yi][xi]
 
     def save_arcgis(self, outfile):
-        print 'Saving raster to {}'.format(os.path.basename(outfile))
+        print('Saving raster to {}'.format(os.path.basename(outfile)))
         with open(outfile, 'w+') as f:
             f.write(self.header)
             for row in self.raster:
@@ -185,7 +185,7 @@ class DirectionRaster(AsciiRaster):
 
                 f.write(' '.join(str(x) for x in new_row))
                 f.write('\n')
-        print 'Done saving raster'
+        print('Done saving raster')
         
     def next_downstream_cell(self, (xi, yi)):
         # Returns an xi, yi, tuple of the downstream cell
@@ -252,7 +252,7 @@ class DirectionRaster(AsciiRaster):
             printable.append(new_row)
 
         for row in printable:
-            print ' '.join(row)
+            print(' '.join(row))
         
     def directly_upstream_cells(self, (xi, yi)):
         res = []

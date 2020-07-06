@@ -15,7 +15,7 @@ def main(args):
     # find all invalid values
     correct_edge_flows(r)
  
-    print 'Invalid Directions Fixed'
+    print('Invalid Directions Fixed')
 
     outfile = os.path.join(args.outdir, args.watershed, 'flow-dir-16th-corrected.asc')
     r.save(outfile)
