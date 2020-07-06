@@ -42,7 +42,7 @@ class Station(object):
         metadata of an input raster
         '''
 
-        return r.raster_coords((self.lat, self.lon))
+        return r.raster_coords(self.lat, self.lon)
         
 
     def vic_coords(self, r):
@@ -81,7 +81,7 @@ def load_stations_w_shortnames(station_csv):
     return stations
 
 
-def directly_downstream_station(station_list, (xi, yi), dir_raster):
+def directly_downstream_station(station_list, xi, yi, dir_raster):
     station_coords = [station.raster_coords(dir_raster) for station in station_list]
     next_cell = dir_raster.next_downstream_cell((xi, yi))
     while next_cell is not None:
@@ -95,8 +95,8 @@ def generate_upstream_station_dict(station_list, dir_raster):
     from collections import defaultdict
     d = defaultdict(list)
     for station in station_list:
-        coords = station.raster_coords(dir_raster)
-        ds_station = directly_downstream_station(station_list, coords, dir_raster)
+        xi, yi = station.raster_coords(dir_raster)
+        ds_station = directly_downstream_station(station_list, xi, yi, dir_raster)
         if ds_station == None:
             continue
         d[ds_station].append(coords)
@@ -140,7 +140,7 @@ def generate_station_map(station_list):
         s += '{stn},{ln}\n'.format(stn=stn.short_name, ln=stn.long_name)
     return s
 
-def find_station_by_coords(station_list, (xi, yi)):
+def find_station_by_coords(station_list, xi, yi):
     raise NotImplemented
 
 def shortname_conflicts(station_list):

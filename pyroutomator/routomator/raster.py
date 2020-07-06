@@ -73,7 +73,7 @@ NODATA_value {5}
                 else:
                     self.raster[i][j] = other.raster[i][j]
 
-    def vic_coords(self, (lat, lon)):
+    def vic_coords(self, lat, lon):
         # based on an input lat/lon, return the i/j cell index from bottom left corner
         max_lon = self.xll + (self.ncols * self.cellsize)
         max_lat = self.yll + (self.nrows * self.cellsize)
@@ -87,11 +87,11 @@ NODATA_value {5}
         yi = next(i for i,v in enumerate(self.y_bnds) if v + self.cellsize > lat)
         return (xi, yi)
 
-    def raster_coords(self, (lat, lon)):
+    def raster_coords(self, lat, lon):
         '''
         Based on an input (lat,lon), this returns the raster index counting from top left
         '''
-        (xi, yi) = self.vic_coords((lat,lon))
+        (xi, yi) = self.vic_coords(lat, lon)
         return (xi, self.nrows - (yi+1))
     
     def cell_bounds(self, xi, yi):
@@ -168,7 +168,7 @@ class DirectionRaster(AsciiRaster):
                           '6': (-1,1),'5': (0,1),'4': (1,1)
                           }
 
-    def _cell_direction(self, (xi, yi)):
+    def _cell_direction(self, xi, yi):
         return self.raster[yi][xi]
 
     def save_arcgis(self, outfile):
@@ -187,22 +187,22 @@ class DirectionRaster(AsciiRaster):
                 f.write('\n')
         print('Done saving raster')
         
-    def next_downstream_cell(self, (xi, yi)):
+    def next_downstream_cell(self, xi, yi):
         # Returns an xi, yi, tuple of the downstream cell
-        direction = self._cell_direction((xi, yi))
+        direction = self._cell_direction(xi, yi)
         if direction == str(self.nodata) or direction == '9':
             return None
         if direction < 0:
             direction = abs(direction)
         return(tuple(map(operator.add, (xi, yi), self.cell_diff[direction])))
 
-    def all_downstream_cells(self, (xi, yi)):
+    def all_downstream_cells(self, xi, yi):
         # Returns a list of tuples containing all the downstream cells from the source
-        next_cell = self.next_downstream_cell((xi, yi))
+        next_cell = self.next_downstream_cell(xi, yi)
         if not next_cell:
             return [(xi, yi)]
         else:
-            return [(xi, yi)] + self.all_downstream_cells(next_cell)
+            return [(xi, yi)] + self.all_downstream_cells(*next_cell)
         
     def _is_downstream(self, source, dest):
         # takes xi,yi tuples and returns True if the flow direction connects source to dest
@@ -211,9 +211,9 @@ class DirectionRaster(AsciiRaster):
         xdiff, ydiff = list(map(operator.sub, dest, source))
         assert (-1 <= xdiff <= 1) and (-1 <= ydiff <= 1), "Direction can only be calculated on adjacent cells"
 
-        return dest == self.next_downstream_cell(source)
+        return dest == self.next_downstream_cell(*source)
 
-    def catchment(self, (xi, yi)):
+    def catchment(self, xi, yi):
         # based on an input direction raster and a lat/lon, this generates a new raster
         # representing the entire catchment area of that point
 
@@ -224,7 +224,7 @@ class DirectionRaster(AsciiRaster):
         temp.raster[yi][xi] = '2'
         return temp
             
-    def catchment_mask(self, (xi, yi)):
+    def catchment_mask(self, xi, yi):
         # based on an input direction raster and a lat/lon, this generates a new raster
         # representing the entire catchment area of that point
 
@@ -254,9 +254,9 @@ class DirectionRaster(AsciiRaster):
         for row in printable:
             print(' '.join(row))
         
-    def directly_upstream_cells(self, (xi, yi)):
+    def directly_upstream_cells(self, xi, yi):
         res = []
-        for neighbor in self.cell_neighbors((xi, yi)):
+        for neighbor in self.cell_neighbors(xi, yi):
             # print '{} -> {} in direction {}'.format(neighbor, source, self._cell_direction(neighbor)),
             if self._is_downstream(neighbor, (xi, yi)):
                 # print 'yes'
@@ -268,7 +268,7 @@ class DirectionRaster(AsciiRaster):
         return res
 
     def all_upstream_cells(self, source):
-        up_neighbors = self.directly_upstream_cells(source)
+        up_neighbors = self.directly_upstream_cells(*source)
         if not up_neighbors:
             return [source]
         else:

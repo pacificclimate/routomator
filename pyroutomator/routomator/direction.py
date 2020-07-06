@@ -4,14 +4,13 @@ class BreakIt(Exception):
     # Custom exception class to break out of nested loop
     pass
 
-def find_direction((x,y), (i,j)):
+def find_direction(x, y, i, j):
     '''
     GRASS directions
     8   1   2
     7   x   3
     6   5   4
     '''
-
     if i < x:
         if j < y: return '6'
         if j == y: return '7'
@@ -47,7 +46,7 @@ def correct_edge_flows(r):
             for i, j in neighbors:
                 try:
                     if r.raster[i][j] != '0':
-                        r.raster[x][y] = find_direction((x,y),(i,j))
+                        r.raster[x][y] = find_direction(x, y, i, j)
                         raise BreakIt # Use custom excpetion to jump out of nested loop
                 except IndexError:
                     continue
