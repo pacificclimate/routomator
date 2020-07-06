@@ -163,13 +163,13 @@ class DirectionRaster(AsciiRaster):
 
         # cell difference Y vaules are counterintuitive...
         # based on row index from TOP LEFT
-        self.cell_diff = {'8': (-1,-1), '1':(0,-1),  '2': (1,-1),
-                          '7': (-1, 0),            '3': (1,0),
-                          '6': (-1,1),'5': (0,1),'4': (1,1)
+        self.cell_diff = {8: (-1,-1), 1:(0,-1),  2: (1,-1),
+                          7: (-1, 0),            3: (1,0),
+                          6: (-1,1), 5: (0,1), 4: (1,1)
                           }
 
     def _cell_direction(self, xi, yi):
-        return self.raster[yi][xi]
+        return int(self.raster[yi][xi])
 
     def save_arcgis(self, outfile):
         print('Saving raster to {}'.format(os.path.basename(outfile)))
@@ -190,7 +190,7 @@ class DirectionRaster(AsciiRaster):
     def next_downstream_cell(self, xi, yi):
         # Returns an xi, yi, tuple of the downstream cell
         direction = self._cell_direction(xi, yi)
-        if direction == str(self.nodata) or direction == '9':
+        if direction == str(self.nodata) or direction == 9:
             return None
         if direction < 0:
             direction = abs(direction)

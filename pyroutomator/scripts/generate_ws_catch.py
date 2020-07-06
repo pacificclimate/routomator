@@ -10,9 +10,9 @@ def main(args):
     sys.setrecursionlimit(10000)
 
     d = DirectionRaster(args.direction)
-    l = tuple(float(x) for x in args.location.split(','))
-    print('Generating catchment for location lat:{} lon:{}'.format(l[0], l[1]))
-    catchment_area = d.catchment_mask(d.raster_coords(l))
+    lat, lon = tuple(float(x) for x in args.location.split(','))
+    print(f'Generating catchment for location lat:{lat} lon:{lon}')
+    catchment_area = d.catchment_mask(*d.raster_coords(lat, lon))
     del(d)
     catch_file = os.path.join(args.tempdir, 'ws.asc')
     catchment_area.save(catch_file)
