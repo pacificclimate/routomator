@@ -108,7 +108,7 @@ NODATA_value {5}
 
                     
     def reset_to_nodata(self):
-        self.raster = [[str(self.nodata) for i in xrange(self.ncols)] for j in xrange(self.nrows)]
+        self.raster = [[str(self.nodata) for i in range(self.ncols)] for j in range(self.nrows)]
 
     def change_nodata(self, new_nodata):
         current_nodata = str(self.nodata)
@@ -133,9 +133,9 @@ NODATA_value {5}
                     count += 1
         return count
 
-    def cell_neighbors(self, (xi, yi)):
-        yr = range(max(0, yi-1), min(self.nrows, yi+2))
-        xr = range(max(0, xi-1), min(self.ncols, xi+2))
+    def cell_neighbors(self, xi, yi):
+        yr = list(range(max(0, yi-1), min(self.nrows, yi+2)))
+        xr = list(range(max(0, xi-1), min(self.ncols, xi+2)))
         neighbors = [(i, j) for j in yr for i in xr if (i != xi or j != yi)]
         return neighbors
 
@@ -178,7 +178,7 @@ class DirectionRaster(AsciiRaster):
             for row in self.raster:
                 new_row = []
                 for val in row:
-                    if val in self.arcgis.keys():
+                    if val in list(self.arcgis.keys()):
                         new_row.append(self.arcgis[val])
                     else:
                         new_row.append(self.nodata)
@@ -208,7 +208,7 @@ class DirectionRaster(AsciiRaster):
         # takes xi,yi tuples and returns True if the flow direction connects source to dest
 
         # basic check if adjacent cells
-        xdiff, ydiff = map(operator.sub, dest, source)
+        xdiff, ydiff = list(map(operator.sub, dest, source))
         assert (-1 <= xdiff <= 1) and (-1 <= ydiff <= 1), "Direction can only be calculated on adjacent cells"
 
         return dest == self.next_downstream_cell(source)
@@ -242,7 +242,7 @@ class DirectionRaster(AsciiRaster):
             new_row = []
             for val in row:
                 old_val = val
-                for i, j in self.print_replace.iteritems():
+                for i, j in self.print_replace.items():
                     val = str(val).replace(i, j)
                     
                 # print '{} replaced with {}'.format(old_val, val)

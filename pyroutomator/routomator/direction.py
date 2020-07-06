@@ -25,8 +25,8 @@ def find_direction((x,y), (i,j)):
         if j > y: return '2'
 
 def find_neighbors(dirs, x, y):
-    yr = range(y-1, y+2)
-    xr = range(x-1, x+2)
+    yr = list(range(y-1, y+2))
+    xr = list(range(x-1, x+2))
     neighbors = [(i, j) for j in yr for i in xr if (i != x or j != y)]
     return neighbors
 

@@ -3,7 +3,7 @@ import os
 class Station(object):
     def __init__(self, long_name, lat, lon, short_name=None, stn_id=None):
         if type(lat) != float or type(lon) != float:
-            raise TypeError, 'Station lat/lon must be of type float'
+            raise TypeError('Station lat/lon must be of type float')
         self.long_name = long_name
         self.stn_id = stn_id
         if short_name:
@@ -112,13 +112,13 @@ def generate_single_subbasin_mask(upstream_stations, dir_raster):
 def generate_subbasin_masks(station_list, dir_raster, outdir):
     upstream = generate_upstream_station_dict(station_list, dir_raster)
     
-    headwater_stations = [station for station in station_list if station.raster_coords(dir_raster) not in upstream.keys()]
+    headwater_stations = [station for station in station_list if station.raster_coords(dir_raster) not in list(upstream.keys())]
     for station in headwater_stations:
         temp_raster = dir_raster.copy_dummy()
         temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_headwater.asc'))
         del(temp_raster)
 
-    interior_stations = [station for station in station_list if station.raster_coords(dir_raster) in upstream.keys()]
+    interior_stations = [station for station in station_list if station.raster_coords(dir_raster) in list(upstream.keys())]
     for station in interior_stations:
         temp_raster = generate_single_subbasin_mask(upstream[station.raster_coords(dir_raster)], dir_raster)
         temp_raster.save(os.path.join(outdir, station.short_name + '_subbasin_interior.asc'))

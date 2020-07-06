@@ -55,7 +55,7 @@ def cell_distance(direction, north, east, south, west):
     if direction == '0': return '0'
     # convert numerical grass directions to common format
     replacements = {'1':'N', '2': 'NE', '3': 'E', '4': 'SE', '5': 'S', '6': 'SW', '7': 'W', '8': 'NW'}
-    for i, j in replacements.iteritems():
+    for i, j in replacements.items():
         direction = str(direction).replace(i, j)
 
     # use midpoint distances when vertical or horizontal direction
