@@ -6,9 +6,7 @@ This is the python part of the routomator and provides scripts to generates wate
 
 1. R library: `module load R`
 1. GDAL library and command line tools: `module load gdal`
-1. Python version 2. The routomator has not been tested on python 3.
-
-*On current 2016-07-19 compute hardware, you must load R _then_ gdal*
+1. Python version 3. As Python 2 is no longer supported, neither does the routomator support it.
 
 ## Installation
 
@@ -17,7 +15,7 @@ Installing the package
 ```bash
 git clone https://github.com/pacificclimate/routomator
 cd routomator/pyroutomator
-virtualenv -p python2 venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -U pip
 pip install -r requirements.txt
