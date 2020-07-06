@@ -23,20 +23,20 @@ def main(args):
     raster = importr('raster')
     rgdal = importr('rgdal')
 
-    print 'Loading Catchement Raster'
+    print('Loading Catchement Raster')
     catch = raster.raster(args.catchment)
 
-    print 'Clipping accumulation raster to watershed area'
+    print('Clipping accumulation raster to watershed area')
     acc = raster.raster(acc)
     acc_masked = raster.mask(acc, catch)
     r.assign('acc_masked', acc_masked)
     r('acc_masked[is.na(acc_masked)] <- -9999')
     raster.NAvalue(acc_masked) = -9999
 
-    print 'Saving clipped accumulation file'
+    print('Saving clipped accumulation file')
     raster.writeRaster(acc_masked, filename=os.path.join(tempdir, 'acc_masked.asc'), format='ascii', overwrite=True, NAFlag=-9999)
 
-    print 'Selecting stations in watershed area'
+    print('Selecting stations in watershed area')
     hydat = r'/home/data/gis/basedata/HYDAT_STN/Canada Hydat/canada_hydat_gt_500km2_catch_wgs84.shp'
     d = os.path.dirname(args.hydat)
     f = os.path.splitext(os.path.basename(args.hydat))[0]
@@ -50,7 +50,7 @@ def main(args):
 
     # correct invalid edge flows
     correct_edge_flows(r)
-    print 'Invalid Directions Fixed'
+    print('Invalid Directions Fixed')
     outfile = os.path.join(args.outdir, args.watershed, 'flow_vic.asc')
     r.change_nodata('-9999')
     r.save(outfile)
@@ -58,14 +58,14 @@ def main(args):
     # Load as direction raster
     r = DirectionRaster(outfile)
     r.save_arcgis(os.path.join(args.outdir, args.watershed, 'flow_arcgis.asc'))
-    print 'Loading Stations'
+    print('Loading Stations')
     stns = load_stations(args.stations)
     stns = generate_shortnames(stns)
 
-    print 'Generating Subbasin Masks'
+    print('Generating Subbasin Masks')
     generate_subbasin_masks(stns, r, os.path.join(args.outdir, args.watershed))
 
-    print 'Done generating masks'
+    print('Done generating masks')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Routomator master script')

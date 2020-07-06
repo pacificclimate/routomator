@@ -11,15 +11,15 @@ def main(args):
 
     d = DirectionRaster(args.direction)
     l = tuple(float(x) for x in args.location.split(','))
-    print 'Generating catchment for location lat:{} lon:{}'.format(l[0], l[1])
+    print('Generating catchment for location lat:{} lon:{}'.format(l[0], l[1]))
     catchment_area = d.catchment_mask(d.raster_coords(l))
     del(d)
     catch_file = os.path.join(args.tempdir, 'ws.asc')
     catchment_area.save(catch_file)
     del(catchment_area)
-    print 'DONE'
+    print('DONE')
 
-    print 'Converting catchment area to polygon'
+    print('Converting catchment area to polygon')
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
     if os.path.exists(ws_shape):
         if args.overwrite:
@@ -35,12 +35,12 @@ def main(args):
         '-f', 'ESRI Shapefile',
         ws_shape
         ]
-    print 'Calling: {}'.format(' '.join(polygonize))
+    print('Calling: {}'.format(' '.join(polygonize)))
     call(polygonize)
-    print 'DONE'
+    print('DONE')
 
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
-    print 'Clipping hydat stations to catchment area'
+    print('Clipping hydat stations to catchment area')
     if os.path.exists(hydat_ws):
         if args.overwrite:
             try:
@@ -51,9 +51,9 @@ def main(args):
             raise Exception('File {} already exists, remove it  or use --overwrite before continuing'.format(hydat_ws))
 
     clip = ['ogr2ogr', '-overwrite', '-clipsrc', ws_shape, '-f', 'CSV', hydat_ws, args.stations, '-lco', 'GEOMETRY=AS_XY']
-    print 'Calling: {}'.format(' '.join(clip))
+    print('Calling: {}'.format(' '.join(clip)))
     call(clip)
-    print 'DONE'
+    print('DONE')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Watershed catchment area generator')

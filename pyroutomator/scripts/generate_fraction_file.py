@@ -18,13 +18,13 @@ def main(args):
     # import the previously created watershed area into R
     r('frac_sum <- function(x, ...){sum(x, na.rm=TRUE)/225}')
 
-    print 'Loading Catchement Raster'
+    print('Loading Catchement Raster')
     catch = raster.raster(args.catchment)
     
-    print 'Creating Fraction File'
+    print('Creating Fraction File')
     fraction = raster.aggregate(catch, fact=15, fun=r('frac_sum'))
     r.assign('fraction', fraction)
-    print '\tSaving Fraction File'
+    print('\tSaving Fraction File')
     raster.writeRaster(fraction, filename=os.path.join(args.outdir, 'fraction.asc'), format='ascii', overwrite=True, NAflag=0)
 
 if __name__ == '__main__':

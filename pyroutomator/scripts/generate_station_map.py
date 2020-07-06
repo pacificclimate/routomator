@@ -15,12 +15,12 @@ def main(args):
     stns = load_stations(hydat_ws)
     stns = generate_shortnames(stns)
 
-    print 'Generating Station File'
+    print('Generating Station File')
     s = generate_station_map(stns)
     stn_fp = os.path.join(args.outdir, 'station_map.txt')
     with open(stn_fp, 'wb') as f:
         f.write(s)
-    print 'Done generating station map'
+    print('Done generating station map')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Subbasin and station file generator')

@@ -14,11 +14,11 @@ def main(args):
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
 
     # Load as direction raster
-    print 'Loading direction raster'
+    print('Loading direction raster')
     r = DirectionRaster(args.direction)
-    print 'Saving with ArcGIS direction keys for possible investigation'
+    print('Saving with ArcGIS direction keys for possible investigation')
     r.save_arcgis(os.path.join(args.outdir, 'flow_arcgis.asc'))
-    print 'Loading Stations'
+    print('Loading Stations')
 
     if args.shortnames:
         stns = load_stations_w_shortnames(hydat_ws)
@@ -31,38 +31,38 @@ def main(args):
     stn_fp = os.path.join(args.outdir, 'station_map.txt')
     with open(stn_fp, 'wb') as f:
         f.write(s)
-    print 'Done generating station map'
+    print('Done generating station map')
 
-    print 'Generating VIC Subbasin Masks'
+    print('Generating VIC Subbasin Masks')
     i = 0
     total = len(stns)
-    print '{} Stations total'.format(total)
+    print('{} Stations total'.format(total))
     upstream_stations = generate_upstream_station_dict(stns, r)
     
-    headwater_stations = [station for station in stns if station.raster_coords(r) not in upstream_stations.keys()]
-    print '{} Headwater stations'.format(len(headwater_stations))
+    headwater_stations = [station for station in stns if station.raster_coords(r) not in list(upstream_stations.keys())]
+    print('{} Headwater stations'.format(len(headwater_stations)))
     for station in headwater_stations:
-        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        print('[{}/{}]: {}'.format(i, total, station.long_name))
         i += 1
         temp_raster = r.copy_dummy()
         temp_raster.save(os.path.join(args.outdir, station.short_name + '_subbasin_headwater.asc'))
         del(temp_raster)
 
-    interior_stations = [station for station in stns if station.raster_coords(r) in upstream_stations.keys()]
-    print '{} Interior stations'.format(len(interior_stations))
+    interior_stations = [station for station in stns if station.raster_coords(r) in list(upstream_stations.keys())]
+    print('{} Interior stations'.format(len(interior_stations)))
     for station in interior_stations:
-        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        print('[{}/{}]: {}'.format(i, total, station.long_name))
         i += 1
         temp_raster = generate_single_subbasin_mask(upstream_stations[station.raster_coords(r)], r)
         temp_raster.save(os.path.join(args.outdir, station.short_name + '_subbasin_interior.asc'))
         del(temp_raster)
-    print 'Done generating VIC Subbasin Masks'
+    print('Done generating VIC Subbasin Masks')
 
-    print 'Generating Diagnostic Output'
+    print('Generating Diagnostic Output')
     i = 0
     # w = shapefile.Writer()
     for station in stns:
-        print '[{}/{}]: {}'.format(i, total, station.long_name)
+        print('[{}/{}]: {}'.format(i, total, station.long_name))
         
         # Convert to geotiff
         temp_raster = r.catchment_mask(station.raster_coords(r))
@@ -91,14 +91,14 @@ def main(args):
     # w.fields = list(shp_reader.fields)
     # w.save(os.path.join(args.outdir, 'subbasins_merged'))
 
-    print 'Done creating diagnostic output'
+    print('Done creating diagnostic output')
 
-    print 'Generating Station File'
+    print('Generating Station File')
     s = generate_station_file(stns, r)
     stn_fp = os.path.join(args.outdir, 'station_file.txt')
     with open(stn_fp, 'wb') as f:
         f.write(s)
-    print 'Done generating station file'
+    print('Done generating station file')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Subbasin and station file generator')

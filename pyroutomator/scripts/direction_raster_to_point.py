@@ -7,7 +7,7 @@ from tempfile import NamedTemporaryFile
 
 def main(args):
     xyzpath = os.path.join(args.tempdir, 'direction.csv')
-    print 'Converting to XYZ ascii'
+    print('Converting to XYZ ascii')
     convertascii = [
         'gdal_translate',
         '-of', 'XYZ',
@@ -17,7 +17,7 @@ def main(args):
         xyzpath
         ]
     call(convertascii)
-    print 'Done'
+    print('Done')
 
     vrt = '''<OGRVRTDataSource>
     <OGRVRTLayer name="{name}">
@@ -31,7 +31,7 @@ def main(args):
     # Save generated VRT as tempfile to load into ogr2ogr
     ### ogr2ogr -overwrite -where "\"Z\" != '0'" output/direction.shp tempfiles/direction.vrt
     vrtpath = os.path.splitext(xyzpath)[0] + '.vrt'
-    print vrtpath
+    print(vrtpath)
     with open(vrtpath, 'wb') as f:
         f.write(vrt)
 

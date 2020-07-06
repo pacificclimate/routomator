@@ -15,9 +15,9 @@ def main(args):
     hydat_ws = os.path.join(args.tempdir, 'hydat.csv') 
 
     # Load as direction raster
-    print 'Loading direction raster'
+    print('Loading direction raster')
     r = DirectionRaster(args.direction)
-    print 'Loading Stations'
+    print('Loading Stations')
 
     if args.shortnames:
         stns = load_stations_w_shortnames(hydat_ws)
@@ -25,9 +25,9 @@ def main(args):
         stns = load_stations(hydat_ws)
         stns = generate_shortnames(stns)
 
-    print 'Generating Station Catchment geotiff and shapefiles'
+    print('Generating Station Catchment geotiff and shapefiles')
     for station in stns:
-        print station.long_name
+        print(station.long_name)
         temp_raster = r.catchment_mask(station.raster_coords(r))
         gtif_fn = os.path.join(args.outdir, 'catchment_' + station.stn_id + '.tif')
         temp_raster.save_geotiff(gtif_fn)
@@ -40,14 +40,14 @@ def main(args):
             shp_fn
             ]
         call(polygonize)
-    print 'Done generating station catchments'
+    print('Done generating station catchments')
 
-    print 'Generating Station File'
+    print('Generating Station File')
     s = generate_station_file(stns, r)
     stn_fp = os.path.join(args.outdir, 'station_file.txt')
     with open(stn_fp, 'wb') as f:
         f.write(s)
-    print 'Done generating station file'
+    print('Done generating station file')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Subbasin and station file generator')

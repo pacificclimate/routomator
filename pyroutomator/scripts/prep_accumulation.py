@@ -14,7 +14,7 @@ def main(args):
 
     ws_shape = os.path.join(args.tempdir, 'ws.shp')
 
-    print 'Clipping accumulation raster to catchment'
+    print('Clipping accumulation raster to catchment')
     acc_cut = [
         'gdalwarp',
         '-overwrite',
@@ -25,14 +25,14 @@ def main(args):
         ]
     call(acc_cut)
 
-    print 'Saving as Arc Ascii'
+    print('Saving as Arc Ascii')
     acc_trans = [
         'gdal_translate',
         '-of', 'AAIGrid', os.path.join(args.tempdir, 'accumulation_clipped.tif'),
         os.path.join(args.tempdir, 'accumulation_clipped.asc')
         ]
     call(acc_trans)
-    print 'Done'
+    print('Done')
     
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Accumulation file prep for flowgen')
