@@ -1,4 +1,4 @@
-numpy
-gdal
-rpy2
-pyshp
+numpy==1.19.0
+gdal==3.0.*
+rpy2==3.3.4
+pyshp==2.1.0
